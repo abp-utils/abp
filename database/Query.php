@@ -107,8 +107,11 @@ class Query extends Model
         } else {
             $sort = 'DESC';
         }
-
-        $this->_order = " ORDER BY `$column` $sort";
+        if (empty($this->_order)) {
+            $this->_order = " ORDER BY `$column` $sort";
+        } else {
+            $this->_order .= ", `$column` $sort";
+        }
 
         return $this;
     }
