@@ -53,6 +53,7 @@ class Controller
             require_once self::VIEW_TEMPLATE_FOLDER . 'footer.php';
             $out = ob_get_clean();
         } catch (\Exception $e) {
+            ob_clean();
             throw $e;
         }
         echo $out;
