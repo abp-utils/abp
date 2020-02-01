@@ -19,6 +19,8 @@ use apb\core\Request;
  */
 class Abp
 {
+    const NAME = 'abp';
+
     const TIMEZONE_DEFAULT = 'Europe/Moscow';
 
     public static $config;

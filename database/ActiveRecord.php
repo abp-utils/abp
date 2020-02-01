@@ -1,8 +1,8 @@
 <?php
 
-namespace apb\database;
+namespace abp\database;
 
-use apb\database\Query;
+use abp\database\Query;
 
 class ActiveRecord extends Query
 {

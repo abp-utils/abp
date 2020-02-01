@@ -1,6 +1,6 @@
 <?php
 
-namespace apb\component;
+namespace abp\component;
 
 class StringHelper
 {

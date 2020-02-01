@@ -1,6 +1,6 @@
 <?php
 
-namespace apb\core;
+namespace abp\core;
 
 use Abp;
 

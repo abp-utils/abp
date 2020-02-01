@@ -1,8 +1,8 @@
 <?php
 
-namespace apb\component;
+namespace abp\component;
 
-use apb\core\Request;
+use abp\core\Request;
 /**
  * Class Api
  * @package app\component

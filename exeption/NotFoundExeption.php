@@ -1,6 +1,6 @@
 <?php
 
-namespace apb\exeption;
+namespace abp\exeption;
 
 class NotFoundExeption extends \Exception
 {
