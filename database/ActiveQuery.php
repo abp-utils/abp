@@ -11,7 +11,7 @@ class ActiveQuery extends Query
 {
     private $modelClass;
     private $where;
-
+    
     /**
      * ActiveQuery constructor.
      * @param string $class

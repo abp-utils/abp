@@ -127,6 +127,10 @@ class Query extends Model
         return $this;
     }
 
+    public function describe()
+    {
+        return $this->command('DESCRIBE ' . $this->_tableName);
+    }
     /**
      * @return array|bool|null
      */
