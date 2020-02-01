@@ -2,9 +2,9 @@
 require 'core/Autoload.php';
 require 'core/ErrorHandler.php';
 
-use apb\database\Database;
-use apb\core\Router;
-use apb\core\Request;
+use abp\database\Database;
+use abp\core\Router;
+use abp\core\Request;
 
 /**
  * Class Abp
