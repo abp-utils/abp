@@ -1,0 +1,21 @@
+{
+    "name": "abp-utils/abp",
+    "description": "MVC framework app builder php",
+    "type": "library",
+    "require": {
+        "php": ">= 7.0"
+    },
+    "license": "public",
+    "authors": [
+        {
+            "name": "KreeK",
+            "email": "kirillnovikovofficial@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "Abp\\": ""
+        }
+    }
+}
