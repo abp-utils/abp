@@ -52,7 +52,7 @@ function exception_handler($exception)
         $trace[($key + 1)]['text'] = 'in ' . $exceptionTrace['file']. ' – ' . $exceptionTrace['class'] . $exceptionTrace['type'] . $exceptionTrace['function'] . '(' . parseArgs($exceptionTrace['args']) . ')';
         $trace[($key + 1)]['line'] = $exceptionTrace['line'];
     }
-    require "$dir/app/view/ErrorHandler.php";
+    require __DIR__."/../view/ErrorHandler.php";
     exit();
 }
 set_exception_handler('exception_handler');

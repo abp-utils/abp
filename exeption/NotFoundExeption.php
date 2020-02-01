@@ -1,6 +1,6 @@
 <?php
 
-namespace app\exeption;
+namespace exeption;
 
 class NotFoundExeption extends \Exception
 {

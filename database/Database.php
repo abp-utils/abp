@@ -1,6 +1,6 @@
 <?php
 
-namespace app\database;
+namespace database;
 
 use Abp;
 

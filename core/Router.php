@@ -1,10 +1,10 @@
 <?php
 
-namespace app\core;
+namespace core;
 
 use Abp;
-use app\component\StringHelper;
-use app\exeption\NotFoundExeption;
+use component\StringHelper;
+use exeption\NotFoundExeption;
 
 class Router
 {

@@ -1,8 +1,8 @@
 <?php
 
-namespace app\database;
+namespace database;
 
-use app\database\Query;
+use database\Query;
 
 class ActiveRecord extends Query
 {

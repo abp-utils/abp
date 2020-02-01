@@ -1,8 +1,8 @@
 <?php
 
-namespace app\database;
+namespace database;
 
-use app\core\Model;
+use core\Model;
 use Abp;
 
 /**

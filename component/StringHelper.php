@@ -1,6 +1,6 @@
 <?php
 
-namespace app\component;
+namespace component;
 
 class StringHelper
 {

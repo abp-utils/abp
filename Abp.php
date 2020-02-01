@@ -1,10 +1,10 @@
 <?php
-require 'vendor/autoload.php';
+require 'core/Autoload.php';
 require 'core/ErrorHandler.php';
 
-use app\database\Database;
-use app\core\Router;
-use app\core\Request;
+use database\Database;
+use core\Router;
+use core\Request;
 
 /**
  * Class Abp

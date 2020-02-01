@@ -1,8 +1,8 @@
 <?php
 
-namespace app\component;
+namespace component;
 
-use app\core\Request;
+use core\Request;
 /**
  * Class Api
  * @package app\component
