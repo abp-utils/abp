@@ -3,9 +3,11 @@
 function autoload($classname)
 {
     $classname = str_replace( '\\', '/', $classname);
-    print_r($classname); echo '<br>';
-    if (file_exists("$classname.php")) {
-        include_once "$classname.php";
-    }
+    if (file_exists(__DIR__. "/../$classname.php")) {
+        include_once __DIR__. "/../$classname.php";
+    } elseif (file_exists( "{$_SERVER['DOCUMENT_ROOT']}/$classname.php")) {
+        include_once "{$_SERVER['DOCUMENT_ROOT']}/$classname.php";
+    } else
+        echo $classname . '<br>';
 }
 spl_autoload_register('autoload');
