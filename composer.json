@@ -15,6 +15,7 @@
     "minimum-stability": "dev",
     "autoload": {
         "psr-4": {
+            "abp\\": "",
             "Abp\\": ""
         }
     }

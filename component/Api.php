@@ -1,14 +1,14 @@
 <?php
 
-namespace component;
+namespace apb\component;
 
-use core\Request;
+use apb\core\Request;
 /**
  * Class Api
  * @package app\component
  */
-class Api {
-
+class Api
+{
     const VERSION = '0.1';
 
     /**

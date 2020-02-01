@@ -1,10 +1,10 @@
 <?php
 
-namespace database;
+namespace apb\database;
 
-use database\Database;
-use database\Query;
-use core\Model;
+use apb\database\Database;
+use apb\database\Query;
+use apb\core\Model;
 use Abp;
 
 class ActiveQuery extends Query

@@ -1,8 +1,8 @@
 <?php
 
-namespace core;
+namespace apb\core;
 
-use component\StringHelper;
+use apb\component\StringHelper;
 use Abp;
 
 class Model
