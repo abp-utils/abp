@@ -13,8 +13,13 @@ function autoload($classname)
         }
     }
 
-    if (file_exists( "{$_SERVER['DOCUMENT_ROOT']}/$classname.php")) {
-        include_once "{$_SERVER['DOCUMENT_ROOT']}/$classname.php";
+    if (php_sapi_name() !== 'cli') {
+        $root = $_SERVER['DOCUMENT_ROOT'];
+    } else {
+        $root = $_SERVER['PWD'];
+    }
+    if (file_exists( "$root/$classname.php")) {
+        include_once "$root/$classname.php";
     }
 }
 spl_autoload_register('autoload');

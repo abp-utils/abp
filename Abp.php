@@ -33,11 +33,15 @@ class Abp
 
     public static $db;
 
+    private static $argv;
+
     public static function init($config)
     {
         self::$config = $config;
         self::initTimeZone();
-        self::setUrl();
+        if (php_sapi_name() !== 'cli') {
+            self::setUrl();
+        }
         self::setDb();
 
         Router::init();
@@ -65,6 +69,20 @@ class Abp
         ob_start();
         var_dump($message);
         return ob_get_clean();
+    }
+
+    public static function argv()
+    {
+        if (empty(self::$argv)) {
+            $argv = $_SERVER['argv'];
+            $argvSort = [];
+            unset($argv[0]);
+            foreach ($argv as $arg) {
+                $argvSort[] = $arg;
+            }
+            self::$argv = $argvSort;
+        }
+        return $argvSort;
     }
 
     public static function server()

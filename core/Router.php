@@ -9,23 +9,31 @@ use Abp;
 class Router
 {
     const CONTROLLER_FOLDER = 'controller';
+    const MIGRATE_FOLDER = 'migrate';
 
     private static $admin = false;
     private static $api = false;
+    private static $console = false;
 
     private static $param = [];
+
 
     /**
      * @throws NotFoundExeption
      */
     public static function init() {
-        self::isAdmin();
-        self::isApi();
+        if (!self::isConsole()) {
+            self::isAdmin();
+            self::isApi();
+        } else {
+            Abp::$requestString = '/'.$_SERVER['argv'][1];
+        }
 
         $request = StringHelper::parseRequest(self::checkAliases(Abp::$requestString), self::$admin, self::$api);
         if (!$request) {
             throw new NotFoundExeption('Страница не найдена.');
         }
+
         if (!empty(Abp::$requestGet)) {
             self::$param = Request::get();
         }
@@ -45,6 +53,9 @@ class Router
         }
         if (self::$api) {
             $folder = self::$api . '\\' .$folder;
+        }
+        if (self::$console) {
+            $folder = self::$console . '\\' .$folder;
         }
         $controllerFull = "$folder\\{$request['parse']['controller']}";
         $actionFull = $request['parse']['action'];
@@ -107,5 +118,19 @@ class Router
             }
         }
         return false;
+    }
+
+    public static function isConsole()
+    {
+        if (php_sapi_name() !== 'cli') {
+            return false;
+        }
+
+        $temp = explode('/', $_SERVER['argv'][1]);
+        if (count($temp) !== 2) {
+            return false;
+        }
+        self::$console = 'console';
+        return true;
     }
 }

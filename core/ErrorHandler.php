@@ -37,6 +37,9 @@ function parseArgs($args)
 
 function exception_handler($exception)
 {
+    if (php_sapi_name() === 'cli') {
+        throw $exception;
+    }
     $dir = $_SERVER['DOCUMENT_ROOT'];
     echo '<link rel="shortcut icon" type="image/x-icon" href="/resourse/img/logo.png">';
     echo '<link href="https://fonts.googleapis.com/css?family=Satisfy&display=swap" rel="stylesheet">';
