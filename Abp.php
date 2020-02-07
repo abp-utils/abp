@@ -31,6 +31,7 @@ class Abp
     public static $requestString;
     public static $requestGet;
 
+    /* @var Database $db */
     public static $db;
 
     private static $argv = [];
