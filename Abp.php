@@ -47,8 +47,12 @@ class Abp
         Router::init();
     }
 
-    public static function debug($message, $var_dump = false, $return = false)
+    public static function debug($message, $console = false, $var_dump = false, $return = false)
     {
+        if ($console) {
+            print_r($message); echo PHP_EOL;
+            return;
+        }
         if (!$var_dump) {
             if ($return) {
                 return print_r($message, true);

@@ -72,11 +72,14 @@ class Router
             return false;
         }
         if (!empty(self::$param)) {
-            $controller->$actionFull(self::$param);
+            $output = $controller->$actionFull(self::$param);
         } else {
-            $controller->$actionFull();
+            $output = $controller->$actionFull();
         }
         $controller->afterAction();
+        if (self::$console && !empty($output)) {
+            exit($output . PHP_EOL);
+        }
     }
 
     /**
