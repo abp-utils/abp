@@ -33,7 +33,7 @@ class Abp
 
     public static $db;
 
-    private static $argv;
+    private static $argv = [];
 
     public static function init($config)
     {
@@ -82,7 +82,7 @@ class Abp
             }
             self::$argv = $argvSort;
         }
-        return $argvSort;
+        return self::$argv;
     }
 
     public static function server()
