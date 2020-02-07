@@ -7,7 +7,7 @@ use Abp;
 
 class Model
 {
-    private $_attributes = [];
+    protected $_attributes = [];
 
     protected $_tableName = null;
 

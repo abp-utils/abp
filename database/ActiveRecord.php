@@ -22,12 +22,19 @@ class ActiveRecord extends Query
         $describe = $this->describe();
         $schema = [];
         foreach ($describe as $value) {
-            $schema[$value['Field']] = null;
+            $schema[$value['Field']] = false;
         }
         parent::__construct($class, $schema);
     }
 
     public function save()
     {
+        $attributes = [];
+        $values = [];
+        foreach ($this->_attributes as $key => $value) {
+            $attributes[] = $key;
+            $values[] = $value === false ? null : $value;
+        }
+        return $this->insert($attributes, $values);
     }
 }

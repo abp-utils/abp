@@ -16,6 +16,7 @@ use Abp;
  */
 class Query extends Model
 {
+    private $_update = '';
     private $_select = '';
     private $_where = '';
     private $_order = '';
@@ -41,6 +42,44 @@ class Query extends Model
             $sql = $this->buildSql();
         }
         return Abp::$db->query($sql);
+    }
+
+    /**
+     * @param string|null $sql
+     * @return array|bool
+     */
+    public function commandExec($sql = null)
+    {
+        if ($sql === null) {
+            $sql = $this->buildSql();
+        }
+        return Abp::$db->execute($sql);
+    }
+
+    /**
+     * @param array $attributes
+     * @param array $values
+     * @return $this
+     */
+    public function insert($attributes = [], $values = [])
+    {
+        if (empty($attributes)) {
+            return $this;
+        }
+        if (empty($values)) {
+            return $this;
+        }
+        if (!is_array($attributes)) {
+            $attributes = [$attributes];
+        }
+        if (!is_array($values)) {
+            $attributes = [$values];
+        }
+        $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
+        $values = implode(', ', array_map(function ($value) {return "'$value'";}, $values));
+
+        $sql = "INSERT INTO `{$this->_tableName}` ($attributes) VALUES ($values)";
+        return $this->commandExec($sql);
     }
 
     /**
