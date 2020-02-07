@@ -9,7 +9,8 @@ class StringHelper
 
     public static function conversionFilename($string)
     {
-        $modelName = array_pop(explode('\\', $string));
+        $temp = explode('\\', $string);
+        $modelName = array_pop($temp);
         $length = strlen($modelName);
         $newString = mb_strtolower($modelName[0]);
         for ($i = 1 ; $i < $length; $i++) {
