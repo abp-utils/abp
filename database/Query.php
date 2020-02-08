@@ -9,6 +9,7 @@ use Abp;
  * Class Query
  * @package app\database
  *
+ * @property string $_update;
  * @property string $_select;
  * @property string $_where;
  * @property string $_order;
@@ -16,11 +17,11 @@ use Abp;
  */
 class Query extends Model
 {
-    private $_update = '';
-    private $_select = '';
-    private $_where = '';
-    private $_order = '';
-    private $_limit = '';
+    protected $_update = '';
+    protected $_select = '';
+    protected $_where = '';
+    protected $_order = '';
+    protected $_limit = '';
 
     /**
      * Query constructor.

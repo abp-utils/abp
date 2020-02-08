@@ -10,8 +10,7 @@ use Abp;
 class ActiveQuery extends Query
 {
     private $modelClass;
-    private $where;
-    
+
     /**
      * ActiveQuery constructor.
      * @param string $class
@@ -21,6 +20,13 @@ class ActiveQuery extends Query
     {
         $this->modelClass = $class;
         parent::__construct($class, $params);
+    }
+
+    public function __debugInfo()
+    {
+        $vars = get_object_vars($this);
+        unset($vars['_attributes']);
+        return $vars;
     }
 
     /**
