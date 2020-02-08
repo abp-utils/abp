@@ -76,15 +76,49 @@ class Query extends Model
         if (!is_array($values)) {
             $attributes = [$values];
         }
+        if (count($attributes) !== count($values)) {
+            throw new \InvalidArgumentException('Количество столбцов должно быть равно количеству значений.');
+        }
         $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
         $values = implode(', ', array_map(function ($value) {return "'$value'";}, $values));
 
-        $sql = "INSERT INTO `{$this->_tableName}` ($attributes) VALUES ($values)";
+        $sql = "INSERT INTO `{$this->_tableName}` ($attributes) VALUES ($values);";
         $result = $this->commandExec($sql);
         if (!$result) {
             return false;
         }
         return Abp::$db->lastInsertId();
+    }
+
+    /**
+     * @param array $attributes
+     * @param array $values
+     * @return $this
+     */
+    public function update($attributes = [], $values = [])
+    {
+        if (empty($attributes)) {
+            return $this;
+        }
+        if (empty($values)) {
+            return $this;
+        }
+        if (!is_array($attributes)) {
+            $attributes = [$attributes];
+        }
+        if (!is_array($values)) {
+            $attributes = [$values];
+        }
+        if (count($attributes) !== count($values)) {
+            throw new \InvalidArgumentException('Количество столбцов должно быть равно количеству значений.');
+        }
+        $parametrs = '';
+        foreach ($attributes as $key => $attribute) {
+            $parametrs .= "`$attribute` = {$values[$key]}, ";
+        }
+        $parametrs = substr($parametrs, 0 ,-2);
+        $this->_update = "UPDATE `{$this->_tableName}` SET $parametrs";
+        return $this;
     }
 
     /**
@@ -108,13 +142,24 @@ class Query extends Model
     }
 
     /**
-     * @param string $column
+     * @param string|array $contidion
      * @param string $value
      * @param string $contidion
      * @return $this
      */
-    public function where($column, $value, $contidion = '=')
+    public function where($expression, $value = null, $contidion = '=')
     {
+        if (!is_array($expression)) {
+            $column = $expression;
+            if ($value === null) {
+                throw new \InvalidArgumentException("Не задано значение для столбца $column.");
+            }
+        } else {
+            foreach ($expression as $expressionKey => $expressionCalue) {
+                $column = $expressionKey;
+                $value = $expressionCalue;
+            }
+        }
         if (empty($this->_where)) {
             $this->_where = " WHERE `$column` $contidion '$value'";
         } else {
@@ -208,9 +253,9 @@ class Query extends Model
         return $data;
     }
 
-    private function buildSql()
+    public function buildSql()
     {
-        $sql = $this->_select . $this->_where . $this->_order . $this->_limit . ';';
+        $sql = $this->_select . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
         return $sql;
     }
 }

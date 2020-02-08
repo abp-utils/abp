@@ -8,6 +8,7 @@ use Abp;
 class Model
 {
     protected $_attributes = [];
+    protected $_changeAttributes = [];
 
     protected $_tableName = null;
 
@@ -31,12 +32,14 @@ class Model
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
         $this->_attributes[$name] = $value;
+        $this->_changeAttributes[$name] = $value;
     }
 
     public function __debugInfo()
     {
         return [
             '_attributes:protected' => $this->_attributes,
+            '_changeAttributes:protected' => $this->_changeAttributes,
         ];
     }
 }

@@ -7,7 +7,7 @@ use abp\database\Query;
 
 class ActiveRecord extends Query
 {
-    private $_isNewRecord = false;
+    public $_isNewRecord = false;
 
     public function __construct($class = null, $params = [])
     {
@@ -29,14 +29,17 @@ class ActiveRecord extends Query
 
     public function save()
     {
-        if (!$this->_isNewRecord) {
-            return false;
-        }
         $attributes = [];
         $values = [];
-        foreach ($this->_attributes as $key => $value) {
+
+        foreach ($this->_changeAttributes as $key => $value) {
             $attributes[] = $key;
             $values[] = $value === false ? null : $value;
+        }
+
+        if (!$this->_isNewRecord) {
+            $identityRecord = array_slice($this->_attributes, 0 , 1);
+            return $this->update($attributes, $values)->where($identityRecord)->commandExec();
         }
         return $this->insert($attributes, $values);
     }
