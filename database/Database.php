@@ -5,12 +5,20 @@ namespace abp\database;
 use Abp;
 use abp\exception\DatabaseException;
 
+/**
+ * Class Database
+ * @package abp\database
+ */
 class Database
 {
     protected $pdo;
     protected $config;
     protected static $instance = null;
 
+    /**
+     * Database constructor.
+     * @throws DatabaseException
+     */
     private function __construct()
     {
         $this->config = Abp::$config['db'];
@@ -26,6 +34,10 @@ class Database
         }
     }
 
+    /**
+     * @param \PDOException $e
+     * @throws DatabaseException
+     */
     public function showException(\PDOException $e)
     {
         switch ($this->config['debug']) {
@@ -43,6 +55,9 @@ class Database
         }
     }
 
+    /**
+     * @return Database|null
+     */
     public static function instance() {
         if (self::$instance === null) {
             self::$instance = new self();
@@ -51,6 +66,13 @@ class Database
         return self::$instance;
     }
 
+    /**
+     * @param string $sql
+     * @param string|array $parametrs
+     * @param bool $return
+     * @return array|bool
+     * @throws DatabaseException
+     */
     public function exec($sql, $parametrs, $return = false) {
         $stmt = $this->pdo->prepare($sql);
         $parametrsNew = null;
@@ -74,23 +96,41 @@ class Database
         }
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
+
+    /**
+     * @param string $sql
+     * @param string|array $parametrs
+     * @return array|bool
+     */
     public function execute($sql , $parametrs = '')
     {
         return $this->exec($sql, $parametrs);
     }
 
+    /**
+     * @param string $sql
+     * @param string|array $parametrs
+     * @return array|bool
+     */
     public function query($sql , $parametrs = '')
     {
         return $this->exec($sql, $parametrs, true);
     }
 
-    public static function lastInsertId()
+    /**
+     * @return string
+     */
+    public function lastInsertId()
     {
-        return self::$db->lastInsertId();
+        return $this->pdo->lastInsertId();
     }
 
-    public static function quote($sql)
+    /**
+     * @param string $sql
+     * @return false|string
+     */
+    public function quote($sql)
     {
-        return self::$db->quote($sql);
+        return $this->pdo->quote($sql);
     }
 }

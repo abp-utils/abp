@@ -80,7 +80,11 @@ class Query extends Model
         $values = implode(', ', array_map(function ($value) {return "'$value'";}, $values));
 
         $sql = "INSERT INTO `{$this->_tableName}` ($attributes) VALUES ($values)";
-        return $this->commandExec($sql);
+        $result = $this->commandExec($sql);
+        if (!$result) {
+            return false;
+        }
+        return Abp::$db->lastInsertId();
     }
 
     /**
