@@ -29,6 +29,9 @@ class ActiveRecord extends Query
 
     public function save()
     {
+        if (!$this->_isNewRecord) {
+            return false;
+        }
         $attributes = [];
         $values = [];
         foreach ($this->_attributes as $key => $value) {
