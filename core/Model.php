@@ -32,4 +32,11 @@ class Model
         }
         $this->_attributes[$name] = $value;
     }
+
+    public function __debugInfo()
+    {
+        return [
+            '_attributes:protected' => $this->_attributes,
+        ];
+    }
 }
