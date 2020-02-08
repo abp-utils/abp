@@ -131,7 +131,7 @@ class Abp
         if ($param === null) {
             return $_COOKIE;
         }
-        return $_COOKIE[$param] ?? false;
+        return htmlspecialchars($_COOKIE[$param]) ?? false;
     }
 
     public static function setCookie($key, $value, $time = null, $path = '/')
