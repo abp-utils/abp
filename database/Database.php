@@ -3,6 +3,7 @@
 namespace abp\database;
 
 use Abp;
+use abp\exception\DatabaseException;
 
 class Database
 {
@@ -29,7 +30,7 @@ class Database
     {
         switch ($this->config['debug']) {
             case 'show':
-                exit('Database error: ' . $e->getMessage() . "<br>");
+                throw new DatabaseException($e->getMessage());
                 break;
             case 'log':
                 //insert log error here
@@ -73,23 +74,23 @@ class Database
         }
         return $stmt->fetchAll(\PDO::FETCH_ASSOC);
     }
-	public function execute($sql , $parametrs = '')
+    public function execute($sql , $parametrs = '')
     {
-		return $this->exec($sql, $parametrs);
-	}
-
-	public function query($sql , $parametrs = '')
-    {
-        return $this->exec($sql, $parametrs, true);
-	}
-
-	public static function lastInsertId()
-    {
-		return self::$db->lastInsertId();
+        return $this->exec($sql, $parametrs);
     }
 
-	public static function quote($sql)
+    public function query($sql , $parametrs = '')
     {
-		return self::$db->quote($sql);
-	}
+        return $this->exec($sql, $parametrs, true);
+    }
+
+    public static function lastInsertId()
+    {
+        return self::$db->lastInsertId();
+    }
+
+    public static function quote($sql)
+    {
+        return self::$db->quote($sql);
+    }
 }
