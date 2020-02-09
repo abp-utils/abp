@@ -26,6 +26,10 @@ class Api
         return json_encode($array, JSON_UNESCAPED_UNICODE);
     }
 
+    /**
+     * @param bool $error
+     * @param mixed $data
+     */
     public static function message(bool $error, $data = '')
     {
         echo self::returnMessage($error, $data);
