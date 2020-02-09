@@ -3,6 +3,7 @@
 namespace abp\core;
 
 use Abp;
+use abp\exception\NotFoundException;
 
 /**
  * Class Controller
@@ -41,16 +42,34 @@ class Controller
     /**
      * @param array $param
      * @param string|null $view
+     * @param bool $isPartical
+     *
      * @throws \Exception
+     * @throws NotFoundException
      */
-    protected function render($param = [], $view = null)
+    protected function render($param = [], $view = null, $isPartical = false)
     {
         extract($param);
         try {
             ob_start();
-            require_once self::VIEW_TEMPLATE_FOLDER . 'header.php';
+            if (!$isPartical) {
+                if (!file_exists(self::VIEW_TEMPLATE_FOLDER . 'header.php')) {
+                    throw new NotFoundException('Шаблон header не найден.');
+                }
+                if (!file_exists(self::VIEW_TEMPLATE_FOLDER . 'footer.php')) {
+                    throw new NotFoundException('Шаблон footer не найден.');
+                }
+            }
+            if (!file_exists(self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php')) {
+                throw new NotFoundException('Шаблон '. ($view ?? $this->action) .' не найден.');
+            }
+            if (!$isPartical) {
+                require_once self::VIEW_TEMPLATE_FOLDER . 'header.php';
+            }
             require_once self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php';
-            require_once self::VIEW_TEMPLATE_FOLDER . 'footer.php';
+            if (!$isPartical) {
+                require_once self::VIEW_TEMPLATE_FOLDER . 'footer.php';
+            }
             $out = ob_get_clean();
         } catch (\Exception $e) {
             ob_clean();
@@ -58,5 +77,17 @@ class Controller
         }
         echo $out;
 
+    }
+
+    /**
+     * @param array $param
+     * @param string|null $view
+     *
+     * @throws \Exception
+     * @throws NotFoundException
+     */
+    protected function renderPartical($param = [], $view = null)
+    {
+        $this->render($param, $view, true);
     }
 }
