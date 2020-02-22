@@ -34,7 +34,7 @@ class Model
      */
     public function __get($name)
     {
-        if (!isset($this->_attributes[$name])) {
+        if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
         return $this->_attributes[$name];
@@ -46,7 +46,7 @@ class Model
      */
     public function __set($name, $value)
     {
-        if (!isset($this->_attributes[$name])) {
+        if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
         $this->_attributes[$name] = $value;
@@ -59,10 +59,7 @@ class Model
      */
     public function __isset($name)
     {
-        if (!isset($this->_attributes[$name])) {
-            return false;
-        }
-        return true;
+        return isset($this->_attributes[$name]);
     }
 
     /**
@@ -70,7 +67,7 @@ class Model
      */
     public function __unset($name)
     {
-        if (!isset($this->_attributes[$name])) {
+        if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
         $this->_unsetAttributes[$name] = $value;
