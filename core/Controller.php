@@ -22,21 +22,36 @@ class Controller
     public $action;
     public $title = null;
 
+    /**
+     * @return bool
+     */
     public function beforeAction()
     {
         return true;
     }
 
+    /**
+     * @return bool
+     */
     public function afterAction()
     {
         return true;
     }
+
     /**
      * @param string $url
      */
     protected function redirect($url)
     {
         Abp::redirect(Abp::url($url));
+    }
+
+    /**
+     * @param string $url
+     */
+    protected function redirectAbsolute($url)
+    {
+        Abp::redirect($url);
     }
 
     /**
