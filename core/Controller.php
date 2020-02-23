@@ -22,6 +22,8 @@ class Controller
     public $action;
     public $title = null;
 
+    private $modals = [];
+
     /**
      * @return bool
      */
@@ -79,8 +81,13 @@ class Controller
                 throw new NotFoundException('Шаблон '. ($view ?? $this->action) .' не найден.');
             }
             if (!$isPartical) {
+                require_once self::VIEW_TEMPLATE_FOLDER . 'head.php';
+                foreach ($this->modals as $modal => $params) {
+                    require_once self::VIEW_FOLDER . $modal . '.php';
+                }
                 require_once self::VIEW_TEMPLATE_FOLDER . 'header.php';
             }
+            
             require_once self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php';
             if (!$isPartical) {
                 require_once self::VIEW_TEMPLATE_FOLDER . 'footer.php';
@@ -104,5 +111,10 @@ class Controller
     protected function renderPartical($param = [], $view = null)
     {
         $this->render($param, $view, true);
+    }
+
+    protected function renderModal($view, $param = [])
+    {
+        $this->modals[$view] = $param;
     }
 }
