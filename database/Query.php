@@ -114,7 +114,7 @@ class Query extends Model
         }
         $parametrs = '';
         foreach ($attributes as $key => $attribute) {
-            $parametrs .= "`$attribute` = {$values[$key]}, ";
+            $parametrs .= "`$attribute` = '{$values[$key]}', ";
         }
         $parametrs = substr($parametrs, 0 ,-2);
         $this->_update = "UPDATE `{$this->_tableName}` SET $parametrs";
@@ -253,6 +253,9 @@ class Query extends Model
         return $data;
     }
 
+    /**
+     * @return string
+     */
     public function buildSql()
     {
         $sql = $this->_select . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
