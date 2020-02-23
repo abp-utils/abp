@@ -114,7 +114,12 @@ class Query extends Model
         }
         $parametrs = '';
         foreach ($attributes as $key => $attribute) {
-            $parametrs .= "`$attribute` = '{$values[$key]}', ";
+            if (is_string($values[$key])) {
+                $param = "'{$values[$key]}'";
+            } else {
+                $param = $values[$key];
+            }
+            $parametrs .= "`$attribute` = $param, ";
         }
         $parametrs = substr($parametrs, 0 ,-2);
         $this->_update = "UPDATE `{$this->_tableName}` SET $parametrs";
