@@ -83,6 +83,7 @@ class Controller
             if (!$isPartical) {
                 require_once self::VIEW_TEMPLATE_FOLDER . 'head.php';
                 foreach ($this->modals as $modal => $params) {
+                    extract($params);
                     require_once self::VIEW_FOLDER . $modal . '.php';
                 }
                 require_once self::VIEW_TEMPLATE_FOLDER . 'header.php';
