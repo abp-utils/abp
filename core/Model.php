@@ -2,6 +2,7 @@
 
 namespace abp\core;
 
+use abp\component\Form;
 use abp\component\StringHelper;
 use Abp;
 
@@ -9,14 +10,14 @@ use Abp;
  * Class Model
  * @package abp\core
  */
-class Model
+class Model extends Form
 {
     protected $_attributes = [];
     protected $_changeAttributes = [];
     protected $_unsetAttributes = [];
 
     protected $_tableName = null;
-
+    
     /**
      * Model constructor.
      * @param string $class
