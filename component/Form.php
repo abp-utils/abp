@@ -51,6 +51,7 @@ class Form
         $input .= '<label class="control-label" for="' . $this->_tableName . '-' . $field . '">' . (($label === '') ? ($this->attributeLabels()[$field] ?? $field) : $label) . '</label>';
         $input .= '<input type="' . $type . '" id="' . $this->_tableName . '-' . $field . '" class="form-control" name="' . $this->_tableName  . '[' . $field . ']" value="' . $this->$field . '" >';
         $input .= '<div id="' . $this->_tableName  . '[' . $field . ']-help" class="form-text text-muted">' . $help . '</div>';
+        $input .= '</div>';
 
         return $input;
     }
