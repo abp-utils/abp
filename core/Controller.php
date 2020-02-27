@@ -23,7 +23,7 @@ class Controller
     public $title = null;
 
     private $modals = [];
-    private $notification = [];
+    private $notifications = [];
 
     /**
      * @return bool
@@ -115,28 +115,71 @@ class Controller
         $this->render($param, $view, true);
     }
 
+    /**
+     * @param string $view
+     * @param array $param
+     */
     protected function renderModal($view, $param = [])
     {
         $this->modals[$view] = $param;
     }
 
+    /**
+     * @param string $text
+     */
     protected function addError($text = 'Произошла ошибка.')
     {
         $this->addNotification($text, 'danger');
     }
 
+    /**
+     * @param string $text
+     */
     protected function addWarning($text = 'Произошла некритическая ошибка.')
     {
         $this->addNotification($text, 'warning');
     }
 
+    /**
+     * @param string $text
+     */
     protected function addSuccess($text = 'Успешно.')
     {
         $this->addNotification($text, 'success');
     }
 
+    /**
+     * @param string $text
+     */
+    protected function addInfo($text = 'Уведомление.')
+    {
+        $this->addNotification($text, 'primary');
+    }
+
+    /**
+     * @param string $text
+     * @param string $type
+     */
     protected function addNotification($text, $type)
     {
-        $this->notification[$type . '_' . uniqid()] = $text;
+        $this->notifications[$type . '_' . uniqid()] = $text;
+    }
+
+    /**
+     * @return string
+     */
+    public function showNotification()
+    {
+        $notificatios = '';
+        foreach ($this->notifications as $typeExp => $text) {
+            $type = explode('_', $typeExp)[0];
+            $notificatios .= '<div class="alert alert-' . $type . ' alert-dismissible fade show" role="alert">' . $text;
+            $notificatios .= '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+            $notificatios .= '<span aria-hidden="true">&times;</span>';
+            $notificatios .= '</button>';
+            $notificatios .= '</div>';
+        }
+
+        return $notificatios;
     }
 }
