@@ -50,8 +50,10 @@ class Model extends Form
         if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
-        $this->_attributes[$name] = $value;
-        $this->_changeAttributes[$name] = $value;
+        if ($this->_attributes[$name] != $value) {
+            $this->_attributes[$name] = $value;
+            $this->_changeAttributes[$name] = $value;
+        }
     }
 
     /**
@@ -60,7 +62,7 @@ class Model extends Form
      */
     public function __isset($name)
     {
-        return isset($this->_attributes[$name]);
+        return in_array($name, array_keys($this->_attributes));
     }
 
     /**
@@ -109,5 +111,28 @@ class Model extends Form
     public function getUnsetAttributes()
     {
         $this->_unsetAttributes;
+    }
+
+    public function load($data)
+    {
+        if (!isset($data[$this->_tableName])) {
+            return false;
+        }
+
+        $modelLoad = $data[$this->_tableName];
+
+        foreach ($modelLoad as $field => $value) {
+            if (!isset($this->$field)) {
+                continue;
+            }
+
+            $this->$field = $value;
+        }
+
+        if (!empty($this->getChangeAttributes())) {
+            return true;
+        }
+
+        return false;
     }
 }

@@ -23,6 +23,7 @@ class Controller
     public $title = null;
 
     private $modals = [];
+    private $notification = [];
 
     /**
      * @return bool
@@ -117,5 +118,25 @@ class Controller
     protected function renderModal($view, $param = [])
     {
         $this->modals[$view] = $param;
+    }
+
+    protected function addError($text = 'Произошла ошибка.')
+    {
+        $this->addNotification($text, 'danger');
+    }
+
+    protected function addWarning($text = 'Произошла некритическая ошибка.')
+    {
+        $this->addNotification($text, 'warning');
+    }
+
+    protected function addSuccess($text = 'Успешно.')
+    {
+        $this->addNotification($text, 'success');
+    }
+
+    protected function addNotification($text, $type)
+    {
+        $this->notification[$type . '_' . uniqid()] = $text;
     }
 }
