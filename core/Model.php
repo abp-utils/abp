@@ -135,4 +135,14 @@ class Model extends Form
 
         return false;
     }
+
+    public function attributeLabels()
+    {
+
+    }
+    
+    public static function relation()
+    {
+
+    }
 }

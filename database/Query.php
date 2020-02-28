@@ -2,6 +2,7 @@
 
 namespace abp\database;
 
+use abp\component\StringHelper;
 use abp\core\Model;
 use Abp;
 
@@ -14,14 +15,19 @@ use Abp;
  * @property string $_where;
  * @property string $_order;
  * @property string $_limit;
+ * @property array $_relations;
  */
 class Query extends Model
 {
+    private $modelClass;
+
     protected $_update = '';
     protected $_select = '';
     protected $_where = '';
     protected $_order = '';
     protected $_limit = '';
+
+    protected $_relations = [];
 
     /**
      * Query constructor.
@@ -30,6 +36,7 @@ class Query extends Model
      */
     public function __construct($class, $params = [])
     {
+        $this->modelClass = $class;
         parent::__construct($class, $params);
     }
 
@@ -225,6 +232,21 @@ class Query extends Model
     {
         return $this->command('DESCRIBE ' . $this->_tableName);
     }
+
+    public function setRelations($relations)
+    {
+        foreach ($relations as $clasName => $relation) {
+            if (count($relation) < 2) {
+                return;
+            }
+            if (!isset($relation[2])) {
+                $relation[2] = $relation[1];
+            }
+            print_r($relation);
+            echo StringHelper::conversionFilename($clasName);
+        }
+    }
+
     /**
      * @return array|bool|null
      */
@@ -234,6 +256,7 @@ class Query extends Model
             return null;
         }
         $this->select()->limit(1);
+        $this->setRelations($this->modelClass::relation());
         $data =  $this->command();
         if (!$data) {
             return false;
@@ -266,4 +289,5 @@ class Query extends Model
         $sql = $this->_select . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
         return $sql;
     }
+
 }
