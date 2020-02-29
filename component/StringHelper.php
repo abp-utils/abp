@@ -24,6 +24,32 @@ class StringHelper
         return $newString;
     }
 
+    public static function revertConversionFilename($string)
+    {
+        $tableName = $string;
+        $length = strlen($tableName);
+        $newString = ucfirst($tableName[0]);
+        for ($i = 1 ; $i < $length; $i++) {
+            if ($tableName[$i] == '_') {
+                $newString[$i] = ucfirst($tableName[$i + 1]);
+                $i++;
+                continue;
+            }
+
+            $newString .= $tableName[$i];
+        }
+        return $newString;
+    }
+
+    public static function checkUpperCaseFirstLetter($string)
+    {
+        $code = ord($string[$i]);
+        if ($code >= self::MIN_UPPER_CASE_CODE && $code <= self::MAX_UPPER_CASE_CODE) {
+            return true;
+        }
+        return false;
+    }
+
     public static function parseRequest($string, $admin, $api)
     {
         $temp = explode('/', $string);

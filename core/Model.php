@@ -12,9 +12,13 @@ use Abp;
  */
 class Model extends Form
 {
+    const MODEL_DEFAULT_FOLDER = '\model\\';
+
     protected $_attributes = [];
     protected $_changeAttributes = [];
     protected $_unsetAttributes = [];
+    protected $_relations = [];
+    protected $_relationsClass = [];
 
     protected $_tableName = null;
     
@@ -26,7 +30,23 @@ class Model extends Form
     public function __construct($class, $params = [])
     {
         $this->_tableName = StringHelper::conversionFilename($class);
-        $this->_attributes = $params;
+        $paramsSave = $params;
+        foreach ($params as $field => $value) {
+            $fieldInfo = explode('.', $field);
+            if (count($fieldInfo) == 1) {
+                continue;
+            }
+            if ($fieldInfo[0] == $this->_tableName) {
+                unset($paramsSave[$field]);
+                $paramsSave[$fieldInfo[1]] = $value;
+            } else {
+                $className = self::MODEL_DEFAULT_FOLDER . StringHelper::revertConversionFilename($fieldInfo[0]);
+                $this->_relations[$className][$fieldInfo[1]] = $value;
+                unset($paramsSave[$field]);
+            }
+        }
+
+        $this->_attributes = $paramsSave;
     }
 
     /**
@@ -35,6 +55,14 @@ class Model extends Form
      */
     public function __get($name)
     {
+        $modelClassname = self::MODEL_DEFAULT_FOLDER . $name;
+        if (isset($this->_relations[$modelClassname]) && class_exists($modelClassname)) {
+            if (!isset($this->_relationsClass[$modelClassname])) {
+                $this->_relationsClass[$modelClassname] = new $modelClassname($modelClassname, $this->_relations[$modelClassname]);
+            }
+            return $this->_relationsClass[$modelClassname];
+        }
+        //var_dump(StringHelper::checkUpperCaseFirstLetter($name)); echo $name; echo '<br>';
         if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
@@ -84,6 +112,7 @@ class Model extends Form
     {
         return [
             '_attributes:protected' => $this->_attributes,
+            '_relations:protected' => $this->_relations,
             '_changeAttributes:protected' => $this->_changeAttributes,
             '_unsetAttributes:protected' => $this->_unsetAttributes,
         ];

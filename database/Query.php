@@ -15,7 +15,7 @@ use Abp;
  * @property string $_where;
  * @property string $_order;
  * @property string $_limit;
- * @property array $_relations;
+ * @property string $_join;
  */
 class Query extends Model
 {
@@ -26,8 +26,7 @@ class Query extends Model
     protected $_where = '';
     protected $_order = '';
     protected $_limit = '';
-
-    protected $_relations = [];
+    protected $_join = '';
 
     /**
      * Query constructor.
@@ -87,7 +86,13 @@ class Query extends Model
             throw new \InvalidArgumentException('Количество столбцов должно быть равно количеству значений.');
         }
         $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
-        $values = implode(', ', array_map(function ($value) {return "'$value'";}, $values));
+        $values = implode(', ', array_map(function ($value) {
+            if (is_string($values[$key])) {
+                return "'{$values[$key]}'";
+            }
+            return $values[$key];
+            }, $values)
+        );
 
         $sql = "INSERT INTO `{$this->_tableName}` ($attributes) VALUES ($values);";
         $result = $this->commandExec($sql);
@@ -137,7 +142,7 @@ class Query extends Model
      * @param array $attributes
      * @return $this
      */
-    public function select($attributes = [])
+    public function select($attributes = [], $quotes = true)
     {
         if (!empty($this->_select)) {
             return $this;
@@ -145,10 +150,17 @@ class Query extends Model
         if (!is_array($attributes)) {
             $attributes = [$attributes];
         }
-        $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
+
+        if ($quotes) {
+            $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
+        } else {
+            $attributes = implode(', ', $attributes);
+        }
+
         if (empty($attributes)) {
             $attributes = '*';
         }
+
         $this->_select = "SELECT $attributes FROM `" . $this->_tableName . '`';
         return $this;
     }
@@ -173,9 +185,9 @@ class Query extends Model
             }
         }
         if (empty($this->_where)) {
-            $this->_where = " WHERE `$column` $contidion '$value'";
+            $this->_where = " WHERE {$this->_tableName}.$column $contidion '$value'";
         } else {
-            $this->_where .= " AND `$column` $contidion '$value'";
+            $this->_where .= " AND {$this->_tableName}.$column $contidion '$value'";
         }
         return $this;
     }
@@ -189,9 +201,9 @@ class Query extends Model
     public function orWhere($column, $value, $contidion = '=')
     {
         if (empty($this->_where)) {
-            $this->_where = " WHERE `$column` $contidion '$value'";
+            $this->_where = " WHERE {$this->_tableName}.$column $contidion '$value'";
         } else {
-            $this->_where .= " OR `$column` $contidion '$value'";
+            $this->_where .= " OR {$this->_tableName}.$column $contidion '$value'";
         }
         return $this;
     }
@@ -209,9 +221,9 @@ class Query extends Model
             $sort = 'DESC';
         }
         if (empty($this->_order)) {
-            $this->_order = " ORDER BY `$column` $sort";
+            $this->_order = " ORDER BY {$this->_tableName}.$column $sort";
         } else {
-            $this->_order .= ", `$column` $sort";
+            $this->_order .= ", {$this->_tableName}.$column $sort";
         }
 
         return $this;
@@ -228,9 +240,32 @@ class Query extends Model
         return $this;
     }
 
-    public function describe()
+    /**
+     * @param string|null $table
+     * @return array|bool
+     */
+    public function describe($table = null)
     {
-        return $this->command('DESCRIBE ' . $this->_tableName);
+        return $this->command('DESCRIBE ' . ($table ?? $this->_tableName));
+    }
+
+    public function innerJoin($table, $column1, $column2)
+    {
+        $describeThisTable = $this->describe();
+        $describeJoinTable = $this->describe($table);
+        $attributes = [];
+        foreach ($describeThisTable as $columnInfo) {
+            $attributes[] = $this->_tableName . '.' . $columnInfo['Field'] . ' AS `' . $this->_tableName . '.' . $columnInfo['Field'] . '`';
+        }
+        foreach ($describeJoinTable as $columnInfo) {
+            $attributes[] = $table . '.' . $columnInfo['Field'] . ' AS `' . $table . '.' . $columnInfo['Field'] . '`';
+        }
+
+        $this->select($attributes, false);
+
+        $this->_join = " INNER JOIN `$table` ON {$this->_tableName}.$column1 = $table.$column2";
+
+        return $this;
     }
 
     public function setRelations($relations)
@@ -242,8 +277,9 @@ class Query extends Model
             if (!isset($relation[2])) {
                 $relation[2] = $relation[1];
             }
-            print_r($relation);
-            echo StringHelper::conversionFilename($clasName);
+
+            $clasName =  StringHelper::conversionFilename($clasName);
+            $this->innerJoin($clasName, $relation[1], $relation[2]);
         }
     }
 
@@ -255,8 +291,8 @@ class Query extends Model
         if ($this->_tableName === null) {
             return null;
         }
-        $this->select()->limit(1);
         $this->setRelations($this->modelClass::relation());
+        $this->select()->limit(1);
         $data =  $this->command();
         if (!$data) {
             return false;
@@ -272,7 +308,7 @@ class Query extends Model
         if ($this->_tableName === null) {
             return null;
         }
-
+        $this->setRelations($this->modelClass::relation());
         $this->select();
         $data =  $this->command();
         if (!$data) {
@@ -286,7 +322,7 @@ class Query extends Model
      */
     public function buildSql()
     {
-        $sql = $this->_select . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
+        $sql = $this->_select . $this->_join . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
         return $sql;
     }
 
