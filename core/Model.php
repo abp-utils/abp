@@ -167,16 +167,16 @@ class Model extends Form
 
     public function attributeLabels()
     {
-
+        return [];
     }
 
     public function changingAttributes()
     {
-
+        return [];
     }
 
     public static function relation()
     {
-
+        return [];
     }
 }

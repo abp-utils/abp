@@ -136,6 +136,7 @@ class Query extends Model
             }
             $parametrs .= "`$attribute` = $param, ";
         }
+
         $parametrs = substr($parametrs, 0 ,-2);
         $this->_update = "UPDATE `{$this->_tableName}` SET $parametrs";
         return $this;
@@ -176,7 +177,9 @@ class Query extends Model
 
     public function selectFrom()
     {
-        $this->_select .= " FROM `" . $this->_tableName . '`';
+        if (!empty($this->_select)) {
+            $this->_select .= " FROM `" . $this->_tableName . '`';
+        }
         return $this;
     }
 
