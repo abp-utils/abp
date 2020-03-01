@@ -34,7 +34,9 @@ class ActiveRecord extends Query
 
         foreach ($this->_changeAttributes as $key => $value) {
             $attributes[] = $key;
-            $values[] = $value === false ? null : $value;
+            $valueAttributes = isset($this->changingAttributes()[$key]) ? $this->changingAttributes()[$key]() : $value;
+            $valueAttributes = $valueAttributes === false ? null : $valueAttributes;
+            $values[] = $valueAttributes;
         }
 
         if (!$this->_isNewRecord) {
