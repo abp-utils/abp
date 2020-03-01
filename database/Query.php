@@ -19,6 +19,8 @@ use Abp;
  */
 class Query extends Model
 {
+    const FieldPrimaryKey = 'PRI';
+
     private $modelClass;
 
     protected $_update = '';
@@ -226,7 +228,7 @@ class Query extends Model
      * @param bool $sortTop
      * @return $this
      */
-    public function order($column, $sortTop = true)
+    public function order($column, $sortTop = true, $noReplace = true)
     {
         if ($sortTop) {
             $sort = 'ASC';
@@ -235,7 +237,7 @@ class Query extends Model
         }
         if (empty($this->_order)) {
             $this->_order = " ORDER BY {$this->_tableName}.$column $sort";
-        } else {
+        } else if ($noReplace) {
             $this->_order .= ", {$this->_tableName}.$column $sort";
         }
 
@@ -278,7 +280,23 @@ class Query extends Model
 
         $this->_join .= " INNER JOIN `$table` ON {$this->_tableName}.$column1 = $table.$column2";
 
+        $this->order($this->getPrimaryKey($describeThisTable), true, false);
+
         return $this;
+    }
+
+    /**
+     * @param array|null $describeTable
+     * @return bool|string
+     */
+    public function getPrimaryKey($describeTable = null)
+    {
+        foreach ($describeTable as $field) {
+            if ($field['Key'] == self::FieldPrimaryKey) {
+                return $field['Field'];
+            }
+        }
+        return false;
     }
 
     public function setRelations($relations)
