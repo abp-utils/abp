@@ -85,12 +85,13 @@ class Query extends Model
         if (count($attributes) !== count($values)) {
             throw new \InvalidArgumentException('Количество столбцов должно быть равно количеству значений.');
         }
+
         $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
         $values = implode(', ', array_map(function ($value) {
-            if (is_string($values[$key])) {
-                return "'{$values[$key]}'";
+            if (is_string($value)) {
+                return "'{$value}'";
             }
-            return $values[$key];
+            return $value;
             }, $values)
         );
 
@@ -142,11 +143,12 @@ class Query extends Model
      * @param array $attributes
      * @return $this
      */
-    public function select($attributes = [], $quotes = true)
+    public function select($attributes = [], $quotes = true, $addSelect = false)
     {
-        if (!empty($this->_select)) {
+        if (!$addSelect && !empty($this->_select)) {
             return $this;
         }
+
         if (!is_array($attributes)) {
             $attributes = [$attributes];
         }
@@ -161,7 +163,18 @@ class Query extends Model
             $attributes = '*';
         }
 
-        $this->_select = "SELECT $attributes FROM `" . $this->_tableName . '`';
+        if (!empty($this->_select)) {
+            $this->_select .= ", $attributes";
+        } else {
+            $this->_select = "SELECT $attributes ";
+        }
+
+        return $this;
+    }
+
+    public function selectFrom()
+    {
+        $this->_select .= " FROM `" . $this->_tableName . '`';
         return $this;
     }
 
@@ -261,16 +274,16 @@ class Query extends Model
             $attributes[] = $table . '.' . $columnInfo['Field'] . ' AS `' . $table . '.' . $columnInfo['Field'] . '`';
         }
 
-        $this->select($attributes, false);
+        $this->select($attributes, false, true);
 
-        $this->_join = " INNER JOIN `$table` ON {$this->_tableName}.$column1 = $table.$column2";
+        $this->_join .= " INNER JOIN `$table` ON {$this->_tableName}.$column1 = $table.$column2";
 
         return $this;
     }
 
     public function setRelations($relations)
     {
-        foreach ($relations as $clasName => $relation) {
+        foreach ($relations as $className => $relation) {
             if (count($relation) < 2) {
                 return;
             }
@@ -278,9 +291,10 @@ class Query extends Model
                 $relation[2] = $relation[1];
             }
 
-            $clasName =  StringHelper::conversionFilename($clasName);
-            $this->innerJoin($clasName, $relation[1], $relation[2]);
+            $className =  StringHelper::conversionFilename($className);
+            $this->innerJoin($className, $relation[1], $relation[2]);
         }
+
     }
 
     /**
@@ -322,6 +336,7 @@ class Query extends Model
      */
     public function buildSql()
     {
+        $this->selectFrom();
         $sql = $this->_select . $this->_join . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
         return $sql;
     }
