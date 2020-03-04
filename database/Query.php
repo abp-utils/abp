@@ -139,6 +139,7 @@ class Query extends Model
 
         $parametrs = substr($parametrs, 0 ,-2);
         $this->_update = "UPDATE `{$this->_tableName}` SET $parametrs";
+
         return $this;
     }
 
@@ -177,9 +178,14 @@ class Query extends Model
 
     public function selectFrom()
     {
+        if (empty($this->_select)) {
+            $this->select();
+        }
+
         if (!empty($this->_select)) {
             $this->_select .= " FROM `" . $this->_tableName . '`';
         }
+
         return $this;
     }
 
