@@ -178,7 +178,7 @@ class Query extends Model
 
     public function selectFrom()
     {
-        if (empty($this->_select)) {
+        if (empty($this->_select) && empty($this->_update)) {
             $this->select();
         }
 

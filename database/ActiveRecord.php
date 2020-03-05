@@ -27,8 +27,26 @@ class ActiveRecord extends Query
         parent::__construct($class, $schema);
     }
 
+    /**
+     * @return bool
+     */
+    public function beforeSave()
+    {
+        return true;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function afterSave() {}
+
     public function save()
     {
+        $result = $this->beforeSave();
+        if (!$result) {
+            return false;
+        }
+
         $attributes = [];
         $values = [];
 
@@ -41,7 +59,9 @@ class ActiveRecord extends Query
 
         if (!$this->_isNewRecord) {
             $identityRecord = array_slice($this->_attributes, 0 , 1);
-            return $this->update($attributes, $values)->where($identityRecord)->commandExec();
+            $result = $this->update($attributes, $values)->where($identityRecord)->commandExec();
+            $this->afterSave();
+            return $result;
         }
         return $this->insert($attributes, $values);
     }
