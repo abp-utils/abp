@@ -71,6 +71,9 @@ class Controller
         try {
             ob_start();
             if (!$isPartical) {
+                if (!file_exists(self::VIEW_TEMPLATE_FOLDER . 'head.php')) {
+                    throw new NotFoundException('Шаблон head не найден.');
+                }
                 if (!file_exists(self::VIEW_TEMPLATE_FOLDER . 'header.php')) {
                     throw new NotFoundException('Шаблон header не найден.');
                 }
