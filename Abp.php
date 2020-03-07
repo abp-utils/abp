@@ -36,6 +36,9 @@ class Abp
 
     private static $argv = [];
 
+    /**
+     * @param array $config
+     */
     public static function init($config)
     {
         self::$config = $config;
@@ -48,6 +51,13 @@ class Abp
         Router::init();
     }
 
+    /**
+     * @param string $message
+     * @param bool $console
+     * @param bool $var_dump
+     * @param bool $return
+     * @return false|string|true|void
+     */
     public static function debug($message, $console = false, $var_dump = false, $return = false)
     {
         if ($console) {
@@ -76,6 +86,9 @@ class Abp
         return ob_get_clean();
     }
 
+    /**
+     * @return array
+     */
     public static function argv()
     {
         if (empty(self::$argv)) {
@@ -90,16 +103,25 @@ class Abp
         return self::$argv;
     }
 
+    /**
+     * @return array
+     */
     public static function server()
     {
         return $_SERVER;
     }
 
+    /**
+     * @return array
+     */
     public static function post()
     {
         return $_POST;
     }
 
+    /**
+     * @return string
+     */
     public static function rootFolder()
     {
         return self::server()['DOCUMENT_ROOT'];
@@ -131,9 +153,15 @@ class Abp
         if ($param === null) {
             return $_COOKIE;
         }
-        return htmlspecialchars($_COOKIE[$param]) ?? false;
+        return isset($_COOKIE[$param]) ? htmlspecialchars($_COOKIE[$param]) : null;
     }
 
+    /**
+     * @param string $key
+     * @param string $value
+     * @param int|null $time
+     * @param string $path
+     */
     public static function setCookie($key, $value, $time = null, $path = '/')
     {
         if ($time === null) {
@@ -142,11 +170,17 @@ class Abp
         setcookie($key, $value, $time, '/');
     }
 
+    /**
+     * @param string $key
+     */
     public static function dropCookie($key)
     {
         setcookie($key, '', time() - 3600, '/');
     }
 
+    /**
+     * @inheritDoc
+     */
     private static function initTimeZone()
     {
         if (isset(self::$config['app']['timezone'])) {
@@ -154,6 +188,9 @@ class Abp
         }
     }
 
+    /**
+     * @inheritDoc
+     */
     private static function setUrl()
     {
         self::$domain = $_SERVER['HTTP_HOST'];
@@ -163,6 +200,9 @@ class Abp
         self::$requestGet = isset(self::server()['REQUEST_URI']) ? explode('?', self::server()['REQUEST_URI'])[1] ?? false : preg_replace('#q=/#', '', explode('&',$_SERVER['QUERY_STRING'])[1] ?? false, 1);
     }
 
+    /**
+     * @inheritDoc
+     */
     private static function setDb()
     {
         self::$db = Database::instance();
