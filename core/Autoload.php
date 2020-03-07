@@ -16,8 +16,13 @@ function autoload($classname)
     if (php_sapi_name() !== 'cli') {
         $root = $_SERVER['DOCUMENT_ROOT'];
     } else {
-        $root = $_SERVER['PWD'];
+        $exp = explode('/', $_SERVER['SCRIPT_FILENAME']);
+        if (count($exp) > 1) {
+            unset($exp[count($exp) - 1]);
+        }
+        $root = implode('/', $exp);
     }
+
     if (file_exists( "$root/$classname.php")) {
         include_once "$root/$classname.php";
     }
