@@ -162,7 +162,7 @@ class Model extends Form
             return true;
         }
 
-        return false;
+        return true;
     }
 
     public function attributeLabels()

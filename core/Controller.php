@@ -17,6 +17,7 @@ class Controller
 {
     const VIEW_FOLDER = 'view/';
     const VIEW_TEMPLATE_FOLDER = 'view/template/';
+    const NOTIFICATIONS_PREFIX = 'notifications';
 
     public $controller;
     public $action;
@@ -71,9 +72,6 @@ class Controller
         try {
             ob_start();
             if (!$isPartical) {
-                if (!file_exists(self::VIEW_TEMPLATE_FOLDER . 'head.php')) {
-                    throw new NotFoundException('Шаблон head не найден.');
-                }
                 if (!file_exists(self::VIEW_TEMPLATE_FOLDER . 'header.php')) {
                     throw new NotFoundException('Шаблон header не найден.');
                 }
@@ -81,7 +79,6 @@ class Controller
                     throw new NotFoundException('Шаблон footer не найден.');
                 }
             }
-
             if (!file_exists(self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php')) {
                 throw new NotFoundException('Шаблон '. ($view ?? $this->action) .' не найден.');
             }
@@ -166,7 +163,23 @@ class Controller
      */
     protected function addNotification($text, $type)
     {
+        Abp::setCookie(self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . uniqid(), $text);
         $this->notifications[$type . '_' . uniqid()] = $text;
+    }
+
+    /**
+     * @return array
+     */
+    private function getNotificationsOnCookie()
+    {
+        $notificatios = [];
+        $cookies = Abp::getCookie();
+        foreach ($cookies as $name => $value) {
+            if (strpos($name, self::NOTIFICATIONS_PREFIX) !== false) {
+                $notificatios[$name] = $value;
+            }
+        }
+        return $notificatios;
     }
 
     /**
@@ -174,16 +187,18 @@ class Controller
      */
     public function showNotification()
     {
-        $notificatios = '';
-        foreach ($this->notifications as $typeExp => $text) {
-            $type = explode('_', $typeExp)[0];
-            $notificatios .= '<div class="alert alert-' . $type . ' alert-dismissible fade show" role="alert">' . $text;
-            $notificatios .= '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
-            $notificatios .= '<span aria-hidden="true">&times;</span>';
-            $notificatios .= '</button>';
-            $notificatios .= '</div>';
+        $notificatios = $this->getNotificationsOnCookie();
+        $notificatiosText = '';
+        foreach ($notificatios as $typeExp => $text) {
+            $type = explode('_', $typeExp)[1];
+            $notificatiosText .= '<div class="alert alert-' . $type . ' alert-dismissible fade show" role="alert">' . $text;
+            $notificatiosText .= '<button type="button" class="close" data-dismiss="alert" aria-label="Close">';
+            $notificatiosText .= '<span aria-hidden="true">&times;</span>';
+            $notificatiosText .= '</button>';
+            $notificatiosText .= '</div>';
+            Abp::dropCookie($typeExp);
         }
 
-        return $notificatios;
+        return $notificatiosText;
     }
 }

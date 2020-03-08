@@ -4,7 +4,7 @@ require 'core/ErrorHandler.php';
 
 use abp\database\Database;
 use abp\core\Router;
-use abp\core\Request;
+use abp\component\Session;
 
 /**
  * Class Abp
@@ -34,6 +34,9 @@ class Abp
     /* @var Database $db */
     public static $db;
 
+    /* @var Session $session */
+    public static $session;
+
     private static $argv = [];
 
     /**
@@ -47,6 +50,7 @@ class Abp
             self::setUrl();
         }
         self::setDb();
+        self::setSession();
 
         Router::init();
     }
@@ -183,8 +187,10 @@ class Abp
      */
     private static function initTimeZone()
     {
-        if (isset(self::$config['app']['timezone'])) {
+        if (!isset(self::$config['app']['timezone'])) {
             date_default_timezone_set(self::TIMEZONE_DEFAULT);
+        } else {
+            date_default_timezone_set(self::$config['app']['timezone']);
         }
     }
 
@@ -206,5 +212,13 @@ class Abp
     private static function setDb()
     {
         self::$db = Database::instance();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private static function setSession()
+    {
+        self::$session = new Session();
     }
 }
