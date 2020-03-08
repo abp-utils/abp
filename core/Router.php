@@ -3,7 +3,7 @@
 namespace abp\core;
 
 use abp\component\StringHelper;
-use abp\exeption\NotFoundExeption;
+use abp\exception\NotFoundException;
 use Abp;
 
 class Router
@@ -19,7 +19,7 @@ class Router
 
 
     /**
-     * @throws NotFoundExeption
+     * @throws NotFoundException
      */
     public static function init() {
         if (!self::isConsole()) {
@@ -31,7 +31,7 @@ class Router
 
         $request = StringHelper::parseRequest(self::checkAliases(Abp::$requestString), self::$admin, self::$api);
         if (!$request) {
-            throw new NotFoundExeption('Страница не найдена.');
+            throw new NotFoundException();
         }
 
         if (!empty(Abp::$requestGet)) {
@@ -43,7 +43,7 @@ class Router
     /**
      * @param array $request
      * @return bool
-     * @throws NotFoundExeption
+     * @throws NotFoundException
      */
     public static function applyRoute($request)
     {
@@ -60,13 +60,13 @@ class Router
         $controllerFull = "$folder\\{$request['parse']['controller']}";
         $actionFull = $request['parse']['action'];
         if (!class_exists($controllerFull)) {
-            throw new NotFoundExeption('Страница не найдена.');
+            throw new NotFoundException();
         }
         $controller = new $controllerFull();
         $controller->controller = $request['origin']['controller'];
         $controller->action = $request['origin']['action'];
         if (!method_exists($controller, $actionFull)) {
-            throw new NotFoundExeption('Страница не найдена.');
+            throw new NotFoundException();
         }
         if (!$controller->beforeAction()) {
             return false;

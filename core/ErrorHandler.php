@@ -52,7 +52,11 @@ function exception_handler($exception)
             if (file_exists(Controller::VIEW_TEMPLATE_FOLDER . 'header.php')) {
                 require_once Controller::VIEW_TEMPLATE_FOLDER . 'header.php';
             }
-            echo '<div class="container"><div class="site-error"><h1></h1><div class="alert alert-danger">Произошла неизвестная ошибка. Попробуйте позже.</div><p class="error-handler-p">Произошла ошибка.</p></div></div>';
+            if ($exception instanceof NotFoundException) {
+                echo '<div class="container"><div class="site-error"><h1></h1><div class="alert alert-danger">'. $exception->getMessage() . '</div></div></div>';
+            } else {
+                echo '<div class="container"><div class="site-error"><h1></h1><div class="alert alert-danger">Произошла неизвестная ошибка. Попробуйте позже.</div></div></div>';
+            }
             if (file_exists(Controller::VIEW_TEMPLATE_FOLDER . 'footer.php')) {
                 require_once Controller::VIEW_TEMPLATE_FOLDER . 'footer.php';
             }
@@ -77,4 +81,5 @@ function exception_handler($exception)
     require __DIR__."/../view/ErrorHandler.php";
     exit();
 }
+
 set_exception_handler('exception_handler');

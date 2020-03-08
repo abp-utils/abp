@@ -132,7 +132,19 @@ class StringHelper
 
     public static function conversionRouterName($string, $type)
     {
-        return $string.ucfirst($type);
+        $length = strlen($string);
+        $objectName = '';
+        $j = 0;
+        for ($i = 0; $i < $length; $i++) {
+            if ($string[$i] === '-') {
+                $objectName[$j] = ucfirst($string[++$i]);
+            } else {
+                $objectName[$j] = $string[$i];
+            }
+            $j++;
+        }
+
+        return $objectName.ucfirst($type);
     }
 
     public static function conversionController($string)

@@ -81,6 +81,7 @@ class Controller
                     throw new NotFoundException('Шаблон footer не найден.');
                 }
             }
+
             if (!file_exists(self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php')) {
                 throw new NotFoundException('Шаблон '. ($view ?? $this->action) .' не найден.');
             }
