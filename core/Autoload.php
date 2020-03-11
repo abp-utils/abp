@@ -13,16 +13,7 @@ function autoload($classname)
         }
     }
 
-    if (php_sapi_name() !== 'cli') {
-        $root = $_SERVER['DOCUMENT_ROOT'];
-    } else {
-        $exp = explode('/', $_SERVER['SCRIPT_FILENAME']);
-        if (count($exp) > 1) {
-            unset($exp[count($exp) - 1]);
-        }
-        $root = implode('/', $exp);
-    }
-
+    $root = Abp::$root;
     if (file_exists( "$root/$classname.php")) {
         include_once "$root/$classname.php";
     }

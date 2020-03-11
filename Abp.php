@@ -39,6 +39,8 @@ class Abp
 
     private static $argv = [];
 
+    public static $root;
+
     /**
      * @param array $config
      */
@@ -51,6 +53,7 @@ class Abp
         }
         self::setDb();
         self::setSession();
+        self::setRoot();
 
         Router::init();
     }
@@ -220,5 +223,22 @@ class Abp
     private static function setSession()
     {
         self::$session = new Session();
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private static function setRoot()
+    {
+        if (php_sapi_name() !== 'cli') {
+            $root = $_SERVER['DOCUMENT_ROOT'];
+        } else {
+            $exp = explode('/', $_SERVER['SCRIPT_FILENAME']);
+            if (count($exp) > 1) {
+                unset($exp[count($exp) - 1]);
+            }
+            $root = implode('/', $exp);
+        }
+        self::$root = $root . '/';
     }
 }
