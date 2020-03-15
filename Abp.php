@@ -31,6 +31,9 @@ class Abp
     public static $requestString;
     public static $requestGet;
 
+    public static $ip;
+    public static $userAgent;
+
     /* @var Database $db */
     public static $db;
 
@@ -54,6 +57,8 @@ class Abp
         self::setDb();
         self::setSession();
         self::setRoot();
+
+        self::setUserInfo();
 
         Router::init();
     }
@@ -240,5 +245,14 @@ class Abp
             $root = implode('/', $exp);
         }
         self::$root = $root . '/';
+    }
+
+    /**
+     * @inheritDoc
+     */
+    private static function setUserInfo()
+    {
+        self::$ip = self::server()['REMOTE_ADDR'];
+        self::$userAgent = self::server()['HTTP_USER_AGENT'];
     }
 }
