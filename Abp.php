@@ -252,7 +252,7 @@ class Abp
      */
     private static function setUserInfo()
     {
-        self::$ip = self::server()['REMOTE_ADDR'];
-        self::$userAgent = self::server()['HTTP_USER_AGENT'];
+        self::$ip = self::server()['REMOTE_ADDR'] ?? null;
+        self::$userAgent = self::server()['HTTP_USER_AGENT'] ?? null;
     }
 }
