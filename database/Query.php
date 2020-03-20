@@ -91,7 +91,7 @@ class Query extends Model
         $attributes = implode(', ', array_map(function ($attribute) {return "`$attribute`";}, $attributes));
         $values = implode(', ', array_map(function ($value) {
             if (is_string($value)) {
-                return "'{$value}'";
+                return '\'' . str_replace('\'', '\\\'' , $value) . '\'';
             }
             return $value;
             }, $values)
