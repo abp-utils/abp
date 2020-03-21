@@ -21,6 +21,9 @@ class Query extends Model
 {
     const FieldPrimaryKey = 'PRI';
 
+    const JOIN_INNER = 'INNER';
+    const JOIN_LEFT = 'LEFT';
+
     private $modelClass;
 
     protected $_update = '';
@@ -176,6 +179,9 @@ class Query extends Model
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function selectFrom()
     {
         if (empty($this->_select) && empty($this->_update)) {
@@ -273,7 +279,14 @@ class Query extends Model
         return $this->command('DESCRIBE ' . ($table ?? $this->_tableName));
     }
 
-    public function innerJoin($table, $column1, $column2)
+    /**
+     * @param string $table
+     * @param string $column1
+     * @param string $column2
+     * @param string $type
+     * @return $this
+     */
+    private function join($table, $column1, $column2, $type)
     {
         $describeThisTable = $this->describe();
         $describeJoinTable = $this->describe($table);
@@ -287,11 +300,33 @@ class Query extends Model
 
         $this->select($attributes, false, true);
 
-        $this->_join .= " INNER JOIN `$table` ON {$this->_tableName}.$column1 = $table.$column2";
+        $this->_join .= " $type JOIN `$table` ON {$this->_tableName}.$column1 = $table.$column2";
 
         $this->order($this->getPrimaryKey($describeThisTable), true, false);
 
         return $this;
+    }
+
+    /**
+     * @param string $table
+     * @param string $column1
+     * @param string $column2
+     * @return $this
+     */
+    public function leftJoin($table, $column1, $column2)
+    {
+        $this->join($table, $column1, $column2, self::JOIN_LEFT);
+    }
+
+    /**
+     * @param string $table
+     * @param string $column1
+     * @param string $column2
+     * @return $this
+     */
+    public function innerJoin($table, $column1, $column2)
+    {
+        $this->join($table, $column1, $column2, self::JOIN_INNER);
     }
 
     /**
@@ -308,6 +343,9 @@ class Query extends Model
         return false;
     }
 
+    /**
+     * @param array $relations
+     */
     public function setRelations($relations)
     {
         foreach ($relations as $className => $relation) {
@@ -319,7 +357,7 @@ class Query extends Model
             }
 
             $className =  StringHelper::conversionFilename($className);
-            $this->innerJoin($className, $relation[1], $relation[2]);
+            $this->leftJoin($className, $relation[1], $relation[2]);
         }
 
     }
@@ -369,3 +407,4 @@ class Query extends Model
     }
 
 }
+

@@ -52,7 +52,12 @@ class Html
                     if (isset($column['value'])) {
                         $value = call_user_func($column['value'], $model);
                     }
-                    $htmlTable .=  '<td>' . $value .'</td>';
+                    if (empty($value)) {
+                        $value = '(Пустое значение)';
+                        $htmlTable .=  '<td class="table-empty-value">' . $value .'</td>';
+                    } else {
+                        $htmlTable .=  '<td>' . $value .'</td>';
+                    }
                 }
             }
             $htmlTable .= '</tr>';
