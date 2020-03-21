@@ -91,4 +91,4 @@ class ErrorHandler
         exit();
     }
 }
-set_exception_handler(function (\Exception $exception) {Logger::exception_handler($exception);});
+set_exception_handler(function ($exception) {Logger::exception_handler($exception);});
