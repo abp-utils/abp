@@ -163,8 +163,10 @@ class Controller
      */
     protected function addNotification($text, $type)
     {
-        Abp::setCookie(self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . uniqid(), $text);
-        $this->notifications[$type . '_' . uniqid()] = $text;
+        $uniqid = uniqid();
+        
+        Abp::setCookie(self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid, $text);
+        $this->notifications[self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid] = $text;
     }
 
     /**
@@ -187,7 +189,9 @@ class Controller
      */
     public function showNotification()
     {
-        $notificatios = $this->getNotificationsOnCookie();
+        $notificatiosCookie = $this->getNotificationsOnCookie();
+        $notificatiosLocal = $this->notifications;
+        $notificatios = array_merge($notificatiosCookie, $notificatiosLocal);
         $notificatiosText = '';
         foreach ($notificatios as $typeExp => $text) {
             $type = explode('_', $typeExp)[1];

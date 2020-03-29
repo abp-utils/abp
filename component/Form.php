@@ -74,11 +74,13 @@ class Form
      * @param string $field
      * @param string $label
      * @param string $help
+     * @param null $value
+     * @param string $type
      * @return string
      */
-    public function textInput($field, $label = '', $help = '', $value = null)
+    public function textInput($field, $label = '', $help = '', $value = null, $type = 'text')
     {
-        return $this->input($field, 'text', $label = '', $help = '', $value);
+        return $this->input($field, $type, $label, $help, $value);
     }
 
     /**
