@@ -9,8 +9,6 @@ use Abp;
 
 class ActiveQuery extends Query
 {
-    private $modelClass;
-
     /**
      * ActiveQuery constructor.
      * @param string $class

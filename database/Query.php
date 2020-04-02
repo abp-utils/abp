@@ -24,7 +24,7 @@ class Query extends Model
     const JOIN_INNER = 'INNER';
     const JOIN_LEFT = 'LEFT';
 
-    private $modelClass;
+    public $modelClass;
 
     protected $_update = '';
     protected $_select = '';
@@ -407,4 +407,5 @@ class Query extends Model
     }
 
 }
+
 

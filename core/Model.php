@@ -21,7 +21,7 @@ class Model extends Form
     protected $_relationsClass = [];
 
     protected $_tableName = null;
-    
+
     /**
      * Model constructor.
      * @param string $class
@@ -30,6 +30,11 @@ class Model extends Form
     public function __construct($class, $params = [])
     {
         $this->_tableName = StringHelper::conversionFilename($class);
+        if ($class::tableName() !== null) {
+            $this->_tableName = $class::tableName();
+        } else {
+            $this->_tableName = StringHelper::conversionFilename($class);
+        }
         $paramsSave = $params;
         foreach ($params as $field => $value) {
             $fieldInfo = explode('.', $field);
@@ -101,7 +106,7 @@ class Model extends Form
         if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }
-        $this->_unsetAttributes[$name] = $value;
+        $this->_unsetAttributes[$name] = true;
         unset($this->_attributes[$name]);
     }
 
@@ -135,13 +140,17 @@ class Model extends Form
     }
 
     /**
-     * 
+     * @return array
      */
     public function getUnsetAttributes()
     {
-        $this->_unsetAttributes;
+        return $this->_unsetAttributes;
     }
 
+    /**
+     * @param array $data
+     * @return bool
+     */
     public function load($data)
     {
         if (!isset($data[$this->_tableName])) {
@@ -165,18 +174,36 @@ class Model extends Form
         return false;
     }
 
+    /**
+     * @return array
+     */
     public function attributeLabels()
     {
         return [];
     }
 
+    /**
+     * @return array
+     */
     public function changingAttributes()
     {
         return [];
     }
 
+    /**
+     * @return array
+     */
     public static function relation()
     {
         return [];
     }
+
+    /**
+     * @return string|null
+     */
+    public static function tableName()
+    {
+        return null;
+    }
 }
+
