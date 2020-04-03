@@ -35,6 +35,14 @@ class Database
     }
 
     /**
+     * @return \PDO
+     */
+    public function getDb()
+    {
+        return $this->pdo;
+    }
+
+    /**
      * @param \PDOException $e
      * @throws DatabaseException
      */
