@@ -33,8 +33,7 @@ class Router
         if (!$request) {
             throw new NotFoundException();
         }
-
-        print_r(Abp::$requestGet); exit();
+        
         if (!empty(Abp::$requestGet)) {
             self::$param = Request::get();
         }
