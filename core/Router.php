@@ -34,6 +34,7 @@ class Router
             throw new NotFoundException();
         }
 
+        print_r(Abp::$requestGet); exit();
         if (!empty(Abp::$requestGet)) {
             self::$param = Request::get();
         }
@@ -88,7 +89,26 @@ class Router
      */
     public static function checkAliases($request)
     {
-        return isset(Abp::$config['router']['alias'][$request]) ? Abp::$config['router']['alias'][$request] : (isset(Abp::$config['router']['alias'][substr($request, 1)]) ? '/'.Abp::$config['router']['alias'][substr($request, 1)] : $request);
+        $alias = isset(Abp::$config['router']['alias'][$request]) ? Abp::$config['router']['alias'][$request] : (isset(Abp::$config['router']['alias'][substr($request, 1)]) ? '/'.Abp::$config['router']['alias'][substr($request, 1)] : $request);
+        if ($request == $alias) {
+            $aliases = Abp::$config['router']['alias'];
+            foreach ($aliases as $key => $value) {
+                $parseKey = explode('/', $key, 2);
+                if ($parseKey[0] !== '*' && $parseKey[1] !== '*') {
+                    continue;
+                }
+                $requestParse = StringHelper::parseRequest($request, self::$admin, self::$api)['origin'];
+                if ($parseKey[0] == '*' && $parseKey[1] == $requestParse['action']) {
+                    Abp::$requestGet['controller'] = $requestParse['controller'];
+                    return "/$value";
+                }
+                if ($parseKey[1] == '*' && $parseKey[0] == $requestParse['controller']) {
+                    Abp::$requestGet['action'] = $requestParse['action'];
+                    return "/$value";
+                }
+            }
+        }
+        return $alias;
     }
 
     public static function isAdmin()
