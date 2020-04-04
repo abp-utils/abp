@@ -33,9 +33,9 @@ class Router
         if (!$request) {
             throw new NotFoundException();
         }
-        
+
         if (!empty(Abp::$requestGet)) {
-            self::$param = Request::get();
+            self::$param = array_merge(self::$param, Request::get());
         }
         self::applyRoute($request);
     }
@@ -98,11 +98,11 @@ class Router
                 }
                 $requestParse = StringHelper::parseRequest($request, self::$admin, self::$api)['origin'];
                 if ($parseKey[0] == '*' && $parseKey[1] == $requestParse['action']) {
-                    Abp::$requestGet['controller'] = $requestParse['controller'];
+                    self::$param['controller'] = $requestParse['controller'];
                     return "/$value";
                 }
                 if ($parseKey[1] == '*' && $parseKey[0] == $requestParse['controller']) {
-                    Abp::$requestGet['action'] = $requestParse['action'];
+                    self::$param['action'] = $requestParse['action'];
                     return "/$value";
                 }
             }
