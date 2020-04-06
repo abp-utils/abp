@@ -97,11 +97,11 @@ class Router
                     continue;
                 }
                 $requestParse = StringHelper::parseRequest($request, self::$admin, self::$api)['origin'];
-                if ($parseKey[0] == '*' && $parseKey[1] == $requestParse['action']) {
+                if ($parseKey[0] == '*' && isset($parseKey[1]) && $parseKey[1] == $requestParse['action']) {
                     self::$param['controller'] = $requestParse['controller'];
                     return "/$value";
                 }
-                if ($parseKey[1] == '*' && $parseKey[0] == $requestParse['controller']) {
+                if (isset($parseKey[1]) && $parseKey[1] == '*' && $parseKey[0] == $requestParse['controller']) {
                     self::$param['action'] = $requestParse['action'];
                     return "/$value";
                 }
