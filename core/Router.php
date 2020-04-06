@@ -93,7 +93,7 @@ class Router
             $aliases = Abp::$config['router']['alias'];
             foreach ($aliases as $key => $value) {
                 $parseKey = explode('/', $key, 2);
-                if ($parseKey[0] !== '*' && $parseKey[1] !== '*') {
+                if ($parseKey[0] !== '*' && isset($parseKey[1]) && $parseKey[1] !== '*') {
                     continue;
                 }
                 $requestParse = StringHelper::parseRequest($request, self::$admin, self::$api)['origin'];
@@ -156,3 +156,4 @@ class Router
         return true;
     }
 }
+
