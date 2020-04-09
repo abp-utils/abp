@@ -20,7 +20,7 @@ class Model extends Form
     protected $_relations = [];
     protected $_relationsClass = [];
 
-    protected $_tableName = null;
+    public $_tableName = null;
 
     /**
      * Model constructor.
@@ -206,4 +206,5 @@ class Model extends Form
         return null;
     }
 }
+
 

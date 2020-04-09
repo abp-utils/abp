@@ -6,11 +6,23 @@ use Abp;
 
 class Html
 {
-    const TABLE_TEMPLATE  = [
+    const TABLE_DATE_FORMAT  = [
         'date' => 'd.m.Y',
         'time' => 'h:i',
         'datetime' => 'd.m.Y H:i',
         'datetimeFull' => 'd.m.Y H:i:s',
+    ];
+
+    const TEMPLATE = [
+        'view' => 'fa-eye',
+        'update' => 'fa-pencil',
+        'delete' => 'fa-trash',
+    ];
+
+    const TEMPLATE_TITLE = [
+        'view' => 'Просмотр',
+        'update' => 'Редактировать',
+        'delete' => 'Удалить',
     ];
 
     public static function table($attributes)
@@ -41,12 +53,21 @@ class Html
 
         foreach ($models as $model) {
             foreach ($columns as $column) {
+                if (isset($column['template'])) {
+                    if (!isset(self::TEMPLATE[$column['template']])) {
+                        continue;
+                    }
+                    $indexColumn = $model->_tableName . '_id';
+                    $controller = $model->_tableName;
+                    $htmlTable .= '<td><a class="a-black" href="/' . $controller . '/' . $column['template'] . '?id=' . $model->$indexColumn . '" title="' .self::TEMPLATE_TITLE[$column['template']]  . '" aria-label="' .self::TEMPLATE_TITLE[$column['template']]  . '"><i class="fa ' . self::TEMPLATE[$column['template']] . ' fa-fw"></i></a></td>';
+                    continue;
+                }
                 $modelColumn = $column['attribute'];
                 if (isset($model->$modelColumn)) {
                     $value = $model->$modelColumn;
-                    if (isset($column['template'])) {
-                        if (isset(self::TABLE_TEMPLATE[$column['template']])) {
-                            $value = date(self::TABLE_TEMPLATE[$column['template']], $model->$modelColumn);
+                    if (isset($column['date-format'])) {
+                        if (isset(self::TABLE_DATE_FORMAT[$column['date-format']])) {
+                            $value = date(self::TABLE_DATE_FORMAT[$column['date-format']], $model->$modelColumn);
                         }
                     }
                     if (isset($column['value'])) {
@@ -67,4 +88,5 @@ class Html
         return $htmlTable;
     }
 }
+
 
