@@ -16,6 +16,8 @@ use Abp;
  * @property string $_order;
  * @property string $_limit;
  * @property string $_join;
+ *
+ * @property bool $_whereIsNull
  */
 class Query extends Model
 {
@@ -32,6 +34,8 @@ class Query extends Model
     protected $_order = '';
     protected $_limit = '';
     protected $_join = '';
+
+    protected $_whereIsNull = false;
 
     /**
      * Query constructor.
@@ -218,6 +222,10 @@ class Query extends Model
             $this->_where = " WHERE {$this->_tableName}.$column $contidion '$value'";
         } else {
             $this->_where .= " AND {$this->_tableName}.$column $contidion '$value'";
+        }
+        if (!$this->_whereIsNull && $contidion == '<>') {
+            $this->_where .= " OR `$column` is null";
+            $this->_whereIsNull = true;
         }
         return $this;
     }
@@ -407,5 +415,6 @@ class Query extends Model
     }
 
 }
+
 
 
