@@ -52,7 +52,7 @@ class Html
                     if (isset($column['value'])) {
                         $value = call_user_func($column['value'], $model);
                     }
-                    if (empty($value)) {
+                    if ($value === null) {
                         $value = '(Пустое значение)';
                         $htmlTable .=  '<td class="table-empty-value">' . $value .'</td>';
                     } else {
@@ -67,3 +67,4 @@ class Html
         return $htmlTable;
     }
 }
+
