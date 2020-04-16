@@ -30,7 +30,7 @@ class ActiveRecord extends Query
     /**
      * @return bool
      */
-    public function beforeSave()
+    public function beforeSave($isNewRecord)
     {
         return true;
     }
@@ -42,7 +42,7 @@ class ActiveRecord extends Query
 
     public function save()
     {
-        $result = $this->beforeSave();
+        $result = $this->beforeSave($this->_isNewRecord);
         if (!$result) {
             return false;
         }
@@ -66,3 +66,4 @@ class ActiveRecord extends Query
         return $this->insert($attributes, $values);
     }
 }
+

@@ -15,6 +15,7 @@ class Model extends Form
     const MODEL_DEFAULT_FOLDER = '\model\\';
 
     protected $_attributes = [];
+    protected $_oldAttributes = [];
     protected $_changeAttributes = [];
     protected $_unsetAttributes = [];
     protected $_relations = [];
@@ -52,6 +53,7 @@ class Model extends Form
         }
 
         $this->_attributes = $paramsSave;
+        $this->_oldAttributes = $paramsSave;
     }
 
     /**
@@ -117,6 +119,7 @@ class Model extends Form
     {
         return [
             '_attributes:protected' => $this->_attributes,
+            '_oldAttributes:protected' => $this->_oldAttributes,
             '_relations:protected' => $this->_relations,
             '_changeAttributes:protected' => $this->_changeAttributes,
             '_unsetAttributes:protected' => $this->_unsetAttributes,
@@ -129,6 +132,14 @@ class Model extends Form
     public function getAttributes()
     {
         return $this->_attributes;
+    }
+
+    /**
+     * @return array
+     */
+    public function getOldAttributes()
+    {
+        return $this->_oldAttributes;
     }
 
     /**
@@ -206,5 +217,6 @@ class Model extends Form
         return null;
     }
 }
+
 
 
