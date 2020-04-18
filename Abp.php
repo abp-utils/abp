@@ -154,6 +154,9 @@ class Abp
      */
     public static function url($request)
     {
+        if ($request == '/') {
+            return  '/';
+        }
         return self::$url .'/' . $request;
     }
 
