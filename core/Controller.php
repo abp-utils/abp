@@ -26,6 +26,8 @@ class Controller
     private $modals = [];
     private $notifications = [];
 
+    private $js = null;
+
     /**
      * @return bool
      */
@@ -205,4 +207,22 @@ class Controller
 
         return $notificatiosText;
     }
+
+    public function registerJS(string $js)
+    {
+        if ($this->js === null) {
+            $this->js = $js;
+        } else {
+            $this->js .= $js;
+        }
+    }
+
+    public function getJS(): string
+    {
+        if ($this->js === null) {
+            return '';
+        }
+        return $this->js;
+    }
 }
+
