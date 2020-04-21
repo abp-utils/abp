@@ -139,25 +139,21 @@ class Abp
         return self::server()['DOCUMENT_ROOT'];
     }
 
-    /**
-     * @param string $url
-     */
-    public static function redirect($url)
+    public static function redirect(string $url)
     {
         header("Location: $url");
-	exit();
+	    exit();
     }
 
-    /**
-     * @param string $request
-     * @return string
-     */
-    public static function url($request)
+    public static function url(string $request, bool $isFull = false): string
     {
         if ($request == '/') {
             return  '/';
         }
-        return self::$url .'/' . $request;
+        if ($isFull) {
+            return $request;
+        }
+        return '/' . $request;
     }
 
     /**
@@ -260,4 +256,5 @@ class Abp
         self::$userAgent = self::server()['HTTP_USER_AGENT'] ?? null;
     }
 }
+
 
