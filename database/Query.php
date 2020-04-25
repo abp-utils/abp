@@ -26,6 +26,8 @@ class Query extends Model
 
     public $modelClass;
 
+    private $_fromFlag = false;
+
     protected $_update = '';
     protected $_select = '';
     protected $_where = '';
@@ -187,8 +189,9 @@ class Query extends Model
         if (empty($this->_select) && empty($this->_update)) {
             $this->select();
         }
-        if (!empty($this->_select)) {
+        if (!empty($this->_select) && !$this->_fromFlag) {
             $this->_select .= " FROM `" . $this->_tableName . '`';
+            $this->_fromFlag = true;
         }
         return $this;
     }
@@ -402,14 +405,29 @@ class Query extends Model
         return $data;
     }
 
-    /**
-     * @return string
-     */
-    public function buildSql()
+    public function buildSql(): string
     {
         $this->selectFrom();
-        $sql = $this->_select . $this->_join . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
+        if (!empty($this->_update)) {
+            $sql = $this->_update . $this->_where . $this->_order . $this->_limit . ';';
+        } else {
+            $sql = $this->_select . $this->_join . $this->_where . $this->_order . $this->_limit . ';';
+        }
+        $this->clearSql();
         return $sql;
     }
+
+    public function clearSql(): void
+    {
+        $this->_fromFlag = false;
+
+        $this->_select = '';
+        $this->_join = '';
+        $this->_update = '';
+        $this->_where = '';
+        $this->_order = '';
+        $this->_limit= '';
+    }
 }
+
 
