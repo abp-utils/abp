@@ -187,11 +187,9 @@ class Query extends Model
         if (empty($this->_select) && empty($this->_update)) {
             $this->select();
         }
-
         if (!empty($this->_select)) {
             $this->_select .= " FROM `" . $this->_tableName . '`';
         }
-
         return $this;
     }
 
@@ -413,9 +411,5 @@ class Query extends Model
         $sql = $this->_select . $this->_join . $this->_update . $this->_where . $this->_order . $this->_limit . ';';
         return $sql;
     }
-
 }
-
-
-
 
