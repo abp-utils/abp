@@ -48,19 +48,7 @@ class Database
      */
     public function showException(\PDOException $e)
     {
-        switch ($this->config['debug']) {
-            case 'show':
-                throw new DatabaseException($e->getMessage());
-                break;
-            case 'log':
-                //insert log error here
-                exit();
-                break;
-            case 'none':
-            default:
-                exit('Произошла ошибка, повторите попытку позже');
-                break;
-        }
+        throw new DatabaseException($e->getMessage());
     }
 
     /**
@@ -142,3 +130,4 @@ class Database
         return $this->pdo->quote($sql);
     }
 }
+
