@@ -46,9 +46,12 @@ class Database
      * @param \PDOException $e
      * @throws DatabaseException
      */
-    public function showException(\PDOException $e)
+    public function showException(\PDOException $e, string $sql = null)
     {
-        throw new DatabaseException($e->getMessage());
+        if ($sql === null) {
+            throw new DatabaseException($e->getMessage());
+        }
+        throw new DatabaseException($e->getMessage() . ' SQL: ' . $sql);
     }
 
     /**
@@ -82,7 +85,7 @@ class Database
         try {
             $result = $stmt->execute($parametrsNew);
         } catch (\PDOException $e) {
-            $this->showException($e);
+            $this->showException($e, $sql);
         }
         if (!$return) {
             return $result;
@@ -130,4 +133,5 @@ class Database
         return $this->pdo->quote($sql);
     }
 }
+
 
