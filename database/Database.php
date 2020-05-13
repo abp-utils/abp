@@ -29,7 +29,7 @@ class Database
         try {
             $this->pdo = new \PDO($dsn, $user, $pass);
             $this->pdo->setAttribute(\PDO::ATTR_ERRMODE, \PDO::ERRMODE_EXCEPTION);
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->showException($e);
         }
     }
@@ -43,10 +43,9 @@ class Database
     }
 
     /**
-     * @param \PDOException $e
      * @throws DatabaseException
      */
-    public function showException(\PDOException $e, string $sql = null)
+    public function showException(\Throwable $e, string $sql = null)
     {
         if ($sql === null) {
             throw new DatabaseException($e->getMessage());
@@ -73,7 +72,11 @@ class Database
      * @throws DatabaseException
      */
     public function exec($sql, $parametrs, $return = false) {
-        $stmt = $this->pdo->prepare($sql);
+        try {
+            $stmt = $this->pdo->prepare($sql);
+        } catch (\Throwable $e) {
+            $this->showException($e, $sql);
+        }
         $parametrsNew = null;
         if($parametrs == '') {
             $parametrsNew = null;
@@ -84,7 +87,7 @@ class Database
         }
         try {
             $result = $stmt->execute($parametrsNew);
-        } catch (\PDOException $e) {
+        } catch (\Throwable $e) {
             $this->showException($e, $sql);
         }
         if (!$return) {
@@ -133,5 +136,6 @@ class Database
         return $this->pdo->quote($sql);
     }
 }
+
 
 
