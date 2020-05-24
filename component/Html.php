@@ -58,7 +58,7 @@ class Html
                         continue;
                     }
                     $indexColumn = $model->_tableName . '_id';
-                    $controller = $model->_tableName;
+                    $controller = StringHelper::conversionTableNameToRouterName($model->_tableName);
                     $htmlTable .= '<td><a class="a-black" href="/' . $controller . '/' . $column['template'] . '?id=' . $model->$indexColumn . '" title="' .self::TEMPLATE_TITLE[$column['template']]  . '" aria-label="' .self::TEMPLATE_TITLE[$column['template']]  . '"><i class="fa ' . self::TEMPLATE[$column['template']] . ' fa-fw"></i></a></td>';
                     continue;
                 }
@@ -88,5 +88,6 @@ class Html
         return $htmlTable;
     }
 }
+
 
 

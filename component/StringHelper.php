@@ -7,6 +7,11 @@ class StringHelper
     const MIN_UPPER_CASE_CODE = 65;
     const MAX_UPPER_CASE_CODE = 90;
 
+    public static function conversionTableNameToRouterName($string)
+    {
+        return str_replace('_', '-', $string);
+    }
+
     public static function conversionFilename($string)
     {
         $temp = explode('\\', $string);
