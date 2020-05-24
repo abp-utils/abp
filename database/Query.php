@@ -285,7 +285,7 @@ class Query extends Model
      */
     public function describe($table = null)
     {
-        return $this->command('DESCRIBE ' . ($table ?? $this->_tableName));
+        return $this->command('DESCRIBE `' . ($table ?? $this->_tableName) . '`');
     }
 
     /**
@@ -429,5 +429,6 @@ class Query extends Model
         $this->_limit= '';
     }
 }
+
 
 
