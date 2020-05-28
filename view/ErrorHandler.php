@@ -1,3 +1,17 @@
+<?php
+use abp\component\Resource;
+
+Resource::register([
+    [
+        'file' => 'abp-style.css',
+        'type' => 'css',
+    ],
+    [
+        'file' => 'bootstrap',
+        'type' => 'css',
+    ],
+]);
+?>
 <div class="error-handler-header">
     <div class="error-handler-error-name"><?= $exceptionName ?></div>
     <div class="error-handler-error-message"><?= $exceptionText ?></div>
