@@ -209,7 +209,7 @@ class Abp
     {
         self::$domain = $_SERVER['HTTP_HOST'];
         self::$protocol = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? $_SERVER['REQUEST_SCHEME'] ?? 'http';
-        self::$url = self::$protocol . "//{$_SERVER['HTTP_HOST']}";
+        self::$url = self::$protocol . "://{$_SERVER['HTTP_HOST']}";
         self::$requestString = isset(self::server()['REQUEST_URI']) ? explode('?', self::server()['REQUEST_URI'])[0] : preg_replace('#q=/#', '', explode('&',$_SERVER['QUERY_STRING'])[0], 1);
         self::$requestGet = isset(self::server()['REQUEST_URI']) ? explode('?', self::server()['REQUEST_URI'])[1] ?? false : preg_replace('#q=/#', '', explode('&',$_SERVER['QUERY_STRING'])[1] ?? false, 1);
     }
@@ -256,5 +256,6 @@ class Abp
         self::$userAgent = self::server()['HTTP_USER_AGENT'] ?? null;
     }
 }
+
 
 
