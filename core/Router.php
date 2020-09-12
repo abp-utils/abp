@@ -57,29 +57,59 @@ class Router
         if (self::$console) {
             $folder = self::$console . '\\' .$folder;
         }
-        $controllerFull = "$folder\\{$request['parse']['controller']}";
-        $actionFull = $request['parse']['action'];
+        $controllerName = $request['parse']['controller'];
+        $actionName = $request['parse']['action'];
+        $controllerFull = "$folder\\$controllerName";
+        $actionFull = $actionName;
         if (!class_exists($controllerFull)) {
-            throw new NotFoundException();
+            if (self::$console) {
+                try {
+                    $controllerFull = self::checkSystemConsoleController($controllerName);
+                } catch (\Throwable $e) {
+                    Abp::debug("Not found controller \"$controllerName\".", true); exit();
+                }
+            } else {
+                throw new NotFoundException();
+            }
         }
         $controller = new $controllerFull();
         $controller->controller = $request['origin']['controller'];
         $controller->action = $request['origin']['action'];
         if (!method_exists($controller, $actionFull)) {
+            if (self::$console) {
+                Abp::debug("Action \"$actionFull\" not found in controller \"$controllerName\".", true); exit();
+            }
             throw new NotFoundException();
         }
         if (!$controller->beforeAction()) {
             return false;
         }
-        if (!empty(self::$param)) {
-            $output = $controller->$actionFull(self::$param);
-        } else {
-            $output = $controller->$actionFull();
+        try {
+            if (!empty(self::$param)) {
+                $output = $controller->$actionFull(self::$param);
+            } else {
+                $output = $controller->$actionFull();
+            }
+        } catch (\Throwable $e) {
+            if (self::$console) {
+                Abp::debug($e->getMessage(), true); exit();
+            }
+            throw $e;
         }
         $controller->afterAction();
         if (self::$console && !empty($output)) {
             exit($output . PHP_EOL);
         }
+    }
+
+    private static function checkSystemConsoleController(string $controllerName): string
+    {
+        $folder = self::CONTROLLER_FOLDER;
+        $controllerFull = "abp\\$folder\\$controllerName";
+        if (!class_exists($controllerFull)) {
+            throw new NotFoundException();
+        }
+        return $controllerFull;
     }
 
     /**

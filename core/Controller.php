@@ -3,6 +3,7 @@
 namespace abp\core;
 
 use Abp;
+use abp\component\ErrorHandler;
 use abp\exception\NotFoundException;
 
 /**
@@ -28,47 +29,70 @@ class Controller
 
     private $js = null;
 
-    /**
-     * @return bool
-     */
-    public function beforeAction()
+    public function beforeAction(): bool
     {
         return true;
     }
 
-    /**
-     * @return bool
-     */
-    public function afterAction()
+    public function afterAction(): bool
     {
         return true;
     }
 
-    /**
-     * @param string $url
-     */
-    protected function redirect($url)
+    protected function redirect(string $url): void
     {
         Abp::redirect(Abp::url($url));
     }
 
-    /**
-     * @param string $url
-     */
-    protected function redirectAbsolute($url)
+    protected function redirectAbsolute(string $url): void
     {
         Abp::redirect($url);
     }
 
     /**
-     * @param array $param
-     * @param string|null $view
-     * @param bool $isPartical
-     *
-     * @throws \Exception
-     * @throws NotFoundException
+     * Use only framework.
      */
-    protected function render($param = [], $view = null, $isPartical = false)
+    public function renderSystemError(\Throwable $exception): void
+    {
+        if (file_exists(Controller::VIEW_TEMPLATE_FOLDER . 'head.php')) {
+            require Controller::VIEW_TEMPLATE_FOLDER . 'head.php';
+        }
+        if (file_exists(Controller::VIEW_TEMPLATE_FOLDER . 'header.php')) {
+            require Controller::VIEW_TEMPLATE_FOLDER . 'header.php';
+        }
+        if ($exception instanceof NotFoundException) {
+            echo '<div class="container"><div class="site-error"><h1></h1><div class="alert alert-danger">' . $exception->getMessage() . '</div></div></div>';
+        } else {
+            echo '<div class="container"><div class="site-error"><h1></h1><div class="alert alert-danger">Произошла неизвестная ошибка. Попробуйте позже.</div></div></div>';
+        }
+        if (file_exists(Controller::VIEW_TEMPLATE_FOLDER . 'footer.php')) {
+            require Controller::VIEW_TEMPLATE_FOLDER . 'footer.php';
+        }
+    }
+
+    /**
+     * Use only framework.
+     */
+    public function renderTraceSystemError(\Throwable $exception): void
+    {
+        $dir = Abp::rootFolder();
+        echo '<link rel="shortcut icon" type="image/x-icon" href="/resourse/img/logo.png">';
+        echo '<link href="https://fonts.googleapis.com/css?family=Satisfy&display=swap" rel="stylesheet">';
+        echo '<meta charset="utf-8">';
+        $exceptionName = get_class($exception);
+        $exceptionText = $exception->getMessage();
+        $exceptionTraceDebug = $exception->getTrace();
+        $trace = [];
+        $trace[0]['text'] = 'in ' . $exception->getFile();
+        $trace[0]['line'] = $exception->getLine();
+        foreach ($exceptionTraceDebug as $key => $exceptionTrace) {
+            $trace[($key + 1)]['text'] = 'in ' . $exceptionTrace['file'] . ' – ' . ($exceptionTrace['class'] ?? '') . ($exceptionTrace['type'] ?? '') . $exceptionTrace['function'] . '(' . ErrorHandler::parseArgs($exceptionTrace['args']) . ')';
+            $trace[($key + 1)]['line'] = $exceptionTrace['line'];
+        }
+        require __DIR__ . "/../view/ErrorHandler.php";
+    }
+
+    protected function render(array $param = [], ?string $view = null, bool $isPartical = false): void
     {
         extract($param);
         try {
@@ -85,20 +109,21 @@ class Controller
                 throw new NotFoundException('Шаблон '. ($view ?? $this->action) .' не найден.');
             }
             if (!$isPartical) {
-                require_once self::VIEW_TEMPLATE_FOLDER . 'head.php';
+                require self::VIEW_TEMPLATE_FOLDER . 'head.php';
                 foreach ($this->modals as $modal => $params) {
                     extract($params);
-                    require_once self::VIEW_FOLDER . $modal . '.php';
+                    require self::VIEW_FOLDER . $modal . '.php';
                 }
-                require_once self::VIEW_TEMPLATE_FOLDER . 'header.php';
+                require self::VIEW_TEMPLATE_FOLDER . 'header.php';
             }
-            
-            require_once self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php';
+
+            require self::VIEW_FOLDER . $this->controller . '/' . ($view ?? $this->action) . '.php';
+
             if (!$isPartical) {
-                require_once self::VIEW_TEMPLATE_FOLDER . 'footer.php';
+                require self::VIEW_TEMPLATE_FOLDER . 'footer.php';
             }
             $out = ob_get_clean();
-        } catch (\Exception $e) {
+        } catch (\Throwable $e) {
             ob_clean();
             throw $e;
         }
@@ -106,64 +131,37 @@ class Controller
 
     }
 
-    /**
-     * @param array $param
-     * @param string|null $view
-     *
-     * @throws \Exception
-     * @throws NotFoundException
-     */
-    protected function renderPartical($param = [], $view = null)
+    protected function renderPartical(array $param = [], ?string $view = null): void
     {
         $this->render($param, $view, true);
     }
 
-    /**
-     * @param string $view
-     * @param array $param
-     */
-    protected function renderModal($view, $param = [])
+    protected function renderModal(string $view, array $param = []): void
     {
         $this->modals[$view] = $param;
     }
 
-    /**
-     * @param string $text
-     */
-    protected function addError($text = 'Произошла ошибка.')
+    protected function addError(string $text = 'Произошла ошибка.'): void
     {
         $this->addNotification($text, 'danger');
     }
 
-    /**
-     * @param string $text
-     */
-    protected function addWarning($text = 'Произошла некритическая ошибка.')
+    protected function addWarning(string $text = 'Произошла некритическая ошибка.'): void
     {
         $this->addNotification($text, 'warning');
     }
 
-    /**
-     * @param string $text
-     */
-    protected function addSuccess($text = 'Успешно.')
+    protected function addSuccess(string $text = 'Успешно.'): void
     {
         $this->addNotification($text, 'success');
     }
 
-    /**
-     * @param string $text
-     */
-    protected function addInfo($text = 'Уведомление.')
+    protected function addInfo(string $text = 'Уведомление.'): void
     {
         $this->addNotification($text, 'primary');
     }
 
-    /**
-     * @param string $text
-     * @param string $type
-     */
-    protected function addNotification($text, $type)
+    protected function addNotification(string $text, string $type): void
     {
         $uniqid = uniqid();
         
@@ -171,10 +169,7 @@ class Controller
         $this->notifications[self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid] = $text;
     }
 
-    /**
-     * @return array
-     */
-    private function getNotificationsOnCookie()
+    private function getNotificationsOnCookie(): array
     {
         $notificatios = [];
         $cookies = Abp::getCookie();
@@ -186,10 +181,7 @@ class Controller
         return $notificatios;
     }
 
-    /**
-     * @return string
-     */
-    public function showNotification()
+    public function showNotification(): string
     {
         $notificatiosCookie = $this->getNotificationsOnCookie();
         $notificatiosLocal = $this->notifications;
@@ -208,7 +200,7 @@ class Controller
         return $notificatiosText;
     }
 
-    public function registerJS(string $js)
+    public function registerJS(string $js): void
     {
         if ($this->js === null) {
             $this->js = $js;

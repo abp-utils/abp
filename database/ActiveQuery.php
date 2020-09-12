@@ -28,27 +28,27 @@ class ActiveQuery extends Query
     }
 
     /**
-     * @return object|bool|null
+     * @return object|null
      */
     public function one()
     {
         $modelClass = $this->modelClass;
         $data = parent::one();
-        if ($data === false) {
-            return false;
+        if ($data === null) {
+            return null;
         }
         return new $modelClass(get_called_class(), $data);
     }
 
     /**
-     * @return array|bool|null
+     * @return array
      */
     public function all()
     {
         $modelClass = $this->modelClass;
         $data = parent::all();
-        if ($data === false) {
-            return false;
+        if (empty($data)) {
+            return [];
         }
         $models = [];
         foreach ($data as $modelData) {

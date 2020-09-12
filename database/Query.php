@@ -383,7 +383,7 @@ class Query extends Model
         $this->select()->limit(1);
         $data =  $this->command();
         if (!$data) {
-            return false;
+            return null;
         }
         return $data[0];
     }
@@ -400,7 +400,7 @@ class Query extends Model
         $this->select();
         $data =  $this->command();
         if (!$data) {
-            return false;
+            return [];
         }
         return $data;
     }
