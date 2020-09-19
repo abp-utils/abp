@@ -50,9 +50,12 @@ class ErrorHandler
     public static function exception_handler($exception)
     {
         if (php_sapi_name() === 'cli') {
-            throw $exception;
+            echo 'PHP Fatal error: ' . $exception->getMessage() . 'in'. $exception->getFile() . ':' . $exception->getLine() . PHP_EOL;
+            echo 'Stack trace:' . PHP_EOL;
+            echo $exception->getTraceAsString() . PHP_EOL;
+            echo 'thrown in ' . $exception->getFile() . ':' . $exception->getLine() . PHP_EOL;
+            exit();
         }
-
         $config = Abp::$config['app'];
         switch ($config['debug']) {
             case 'false':
@@ -64,4 +67,6 @@ class ErrorHandler
         }
     }
 }
-set_exception_handler(function ($exception) {Logger::exception_handler($exception);});
+set_exception_handler(function ($exception) {
+    Logger::exception_handler($exception);
+});

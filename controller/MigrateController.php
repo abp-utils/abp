@@ -21,13 +21,20 @@ class MigrateController extends ConsoleController
     public function createAction()
     {
         if (!isset($this->params[0])) {
-            return 'Задайте имя миграции.';
+            return 'The migration name cannot be empty.';
         }
         $migrationName = $this->params[0];
         $date = date('ymd_His');
-        $fullName = Abp::$root . Router::MIGRATE_FOLDER . '/'. self::MIGRATE_PREFIX . "_{$date}_$migrationName.sql";
+        $migrateName = self::MIGRATE_PREFIX . "_{$date}_$migrationName.sql";
+        $fullName = Abp::$root . Router::MIGRATE_FOLDER . '/'. $migrateName;
+        if (!$this->askYNQuestion(
+            "To create a migration \"$migrateName\" ? (yes|no) [no]: "
+        )) {
+            return 'Migration creation was refused.';
+        }
         $fp = fopen($fullName, "w");
         fclose($fp);
+        return "Migration \"$migrateName\" was created.";
     }
 
     /**
@@ -58,19 +65,16 @@ class MigrateController extends ConsoleController
         }
 
         if (empty($migrationsNormal)) {
-            return 'Нет миграций, доступных для применения';
+            return 'There is no migration available for the application.';
         }
-        $this->_print('Миграции, доступные для применения: ');
+        $this->_print('Migration available for the application: ');
         foreach ($migrationsNormal as $migration) {
             $this->_print('   ' . $migration);
         }
-        if ($this->isInteraction) {
-            $input = readline('Применить миграции? (y/n) ');
-        } else {
-            $input = 'y';
-        }
-        if ($input !== 'y') {
-            return 'Миграции не были применены.';
+        if (!$this->askYNQuestion(
+            "To apply the migration? (yes|no) [no]: "
+        )) {
+            return 'Migrations were not applied.';
         }
 
         foreach ($migrationsNormal as $migration) {
@@ -82,17 +86,17 @@ class MigrateController extends ConsoleController
             }
             try {
                 $result = Abp::$db->execute($migrationCode);
-            } catch (\Exception $e) {
-                throw new MigrateException("Не удалось применить миграцию $migration" . PHP_EOL . $e->getMessage());
+            } catch (\Throwable $e) {
+                throw new MigrateException("Failed to apply migration $migration" . PHP_EOL . $e->getMessage());
             }
             if (!$result) {
-                $this->_print("Не удалось применить миграцию $migration.");
+                $this->_print("Failed to apply migration $migration.");
             }
             $migrate = new Migrate();
             $migrate->name = $migration;
             $migrate->time = time();
             $migrate->save();
-            $this->_print("Миграция $migration успешно применена.");
+            $this->_print("Migration $migration successfully applied.");
 
         }
     }

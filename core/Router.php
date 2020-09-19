@@ -91,9 +91,6 @@ class Router
                 $output = $controller->$actionFull();
             }
         } catch (\Throwable $e) {
-            if (self::$console) {
-                Abp::debug($e->getMessage(), true); exit();
-            }
             throw $e;
         }
         $controller->afterAction();

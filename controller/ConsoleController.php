@@ -64,4 +64,17 @@ class ConsoleController extends Controller
         echo 'File: ' . $e->getFile() . PHP_EOL;
         echo 'Line: ' . $e->getLine() . PHP_EOL;
     }
+
+    protected function askYNQuestion(string $textAsk, array $options = ['y', 'yes']): bool
+    {
+        if ($this->isInteraction) {
+            $input = readline($textAsk);
+        } else {
+            return true;
+        }
+        if (!in_array($input, $options)) {
+            return false;
+        }
+        return true;
+    }
 }

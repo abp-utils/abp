@@ -22,10 +22,11 @@ class CrudController extends ConsoleController
     public function createAction()
     {
         if (!isset($this->params[0])) {
-            return 'Задайте имя crud.';
+            return 'The crud name cannot be empty.';
         }
         $crudName = $this->params[0];
         $isCreate = ['controller' => 'controller', 'model' => 'model', 'query' => 'model/query', 'schema' => 'model/schema'];
+        $helpString = '';
         unset($this->params[0]);
         foreach ($this->params as $param) {
             switch ($param) {
@@ -82,6 +83,6 @@ class CrudController extends ConsoleController
             fclose($fileCreate);
             $this->_print(ucfirst($key) .  " \"$className\" was created.");
         }
-        return 'Success';
+        return 'Success.';
     }
 }
