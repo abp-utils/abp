@@ -69,7 +69,7 @@ class Model extends Form
             }
             return $this->_relationsClass[$modelClassname];
         }
-        //var_dump(StringHelper::checkUpperCaseFirstLetter($name)); echo $name; echo '<br>';
+
         if (!in_array($name, array_keys($this->_attributes))) {
             throw new \InvalidArgumentException("Свойство $name не существует в модели " . self::class);
         }

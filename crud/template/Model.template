@@ -1,0 +1,13 @@
+<?php
+
+namespace $namespacemodel;
+
+use $namespacemodel\schema\$classname as $classnameSchema;
+
+/**
+ * Class $classname
+ * @package $namespacemodel
+ */
+class $classname extends $classnameSchema
+{
+}

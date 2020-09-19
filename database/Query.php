@@ -372,37 +372,43 @@ class Query extends Model
     }
 
     /**
-     * @return array|bool|null
+     * @return mixed|null
      */
     public function one()
     {
         if ($this->_tableName === null) {
             return null;
         }
-        $this->setRelations($this->modelClass::relation());
-        $this->select()->limit(1);
-        $data =  $this->command();
-        if (!$data) {
+        $data = $this->prepareFind();
+        if (empty($data)) {
             return null;
         }
         return $data[0];
     }
 
     /**
-     * @return array|bool|null
+     * @return array|bool
      */
     public function all()
     {
         if ($this->_tableName === null) {
-            return null;
+            return [];
         }
-        $this->setRelations($this->modelClass::relation());
-        $this->select();
-        $data =  $this->command();
-        if (!$data) {
+        $data = $this->prepareFind();
+        if (empty($data)) {
             return [];
         }
         return $data;
+    }
+
+    /**
+     * @return array|bool
+     */
+    private function prepareFind()
+    {
+        $this->setRelations($this->modelClass::relation());
+        $this->select();
+        return $this->command();
     }
 
     public function buildSql(): string

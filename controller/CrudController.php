@@ -62,7 +62,7 @@ class CrudController extends ConsoleController
                 $className = ucfirst(explode('/', $crudName)[1]) . ucfirst($key);
             }
             $createName = "$folderName$create/$className.php";
-            $templateName = self::TEMPLATE_FOLDER . '/' . ucfirst($key). '.template';
+            $templateName = __DIR__ . '/../' . self::TEMPLATE_FOLDER . '/' . ucfirst($key). '.template';
             $fileTemplate = file_get_contents($templateName);
             $replace = [
                 empty($folderName) ? '' : "$folderName\\",
@@ -80,6 +80,7 @@ class CrudController extends ConsoleController
             $fileCreate = fopen($createName, 'w');
             fwrite($fileCreate, $fileRender);
             fclose($fileCreate);
+            $this->_print(ucfirst($key) .  " \"$className\" was created.");
         }
         return 'Success';
     }

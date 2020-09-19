@@ -1,0 +1,16 @@
+<?php
+
+namespace $namespacecontroller;
+
+use abp\core\Controller;;
+
+/**
+ * Class $classname
+ * @package $namespacecontroller
+ */
+class $classname extends Controller
+{
+    public function indexAction()
+    {
+    }
+}

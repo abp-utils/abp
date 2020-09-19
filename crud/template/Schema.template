@@ -1,0 +1,19 @@
+<?php
+
+namespace $namespacemodel\schema;
+
+use abp\database\ActiveRecord;
+
+/**
+ * Class $classname
+ * @package $namespacemodel\schema
+ *
+ * @property int $$tablename_id
+ */
+class $classname extends ActiveRecord
+{
+    public static function find()
+    {
+        return new \$namespacemodel\query\$classname(get_called_class());
+    }
+}

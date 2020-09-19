@@ -71,7 +71,8 @@ class Database
      * @return array|bool
      * @throws DatabaseException
      */
-    public function exec($sql, $parametrs, $return = false) {
+    public function exec(string $sql, $parametrs, $return = false)
+    {
         try {
             $stmt = $this->pdo->prepare($sql);
         } catch (\Throwable $e) {
@@ -111,10 +112,11 @@ class Database
 
     /**
      * @param string $sql
-     * @param string|array $parametrs
+     * @param string $parametrs
      * @return array|bool
+     * @throws DatabaseException
      */
-    public function query($sql , $parametrs = '')
+    public function query(string $sql , $parametrs = '')
     {
         return $this->exec($sql, $parametrs, true);
     }
