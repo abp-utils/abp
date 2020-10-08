@@ -1,14 +1,13 @@
 <?php
 use abp\component\Resource;
-
+echo '<meta charset="utf-8">';
+echo '<link rel="shortcut icon" type="image/x-icon" href="/resourse/img/logo.png">';
 Resource::register([
     [
-        'file' => 'abp-style.css',
-        'type' => 'css',
+        'resource' => 'satisfy',
     ],
     [
-        'file' => 'bootstrap',
-        'type' => 'css',
+        'resource' => 'bootstrap',
     ],
 ]);
 ?>
@@ -47,5 +46,69 @@ Resource::register([
     </div>
 </div>
 <style>
-    body {background: transparent;}
+    .error-handler-header, .error-handler-footer{
+        width: 100%;
+        min-width: 860px;
+        margin: 0 auto;
+        background: #eaeaea;
+        padding: 40px 50px 30px 50px;
+        border-bottom: #ccc 1px solid;
+    }
+    .error-handler-footer{
+        border-top: #ccc 1px solid;
+    }
+    .error-handler-error-name{
+        font-size: 30px;
+        color: #f11c1c;
+        margin-bottom: 30px;
+    }
+    .error-handler-error-message{
+        font-size: 20px;
+        line-height: 1.25;
+        color: #505050;
+    }
+    .error-handler-body{
+        margin-top: 30px;
+        margin-bottom: 40px;
+    }
+    .error-handler-body-cont{
+    }
+    .error-handler-body-cont-line{
+        background-color: #fafafa;
+        padding: 10px 0;
+        box-sizing: content-box;
+    }
+    .error-handler-body-cont-line-number,
+    .error-handler-body-cont-line-text,
+    .error-handler-body-cont-line-atline,
+    .error-handler-body-cont-line-line{
+        float: left;
+    }
+    .error-handler-body-cont-line-number{
+        width: 6%;
+        margin-left: 4%;
+    }
+    .error-handler-body-cont-line-text{
+        width: 70%;
+    }
+    .error-handler-body-cont-line-atline{
+        width: 8%;
+    }
+    .error-handler-body-cont-line-line{
+        width: 7%;
+        margin-right: 5%;
+        text-align: right;
+    }
+    .error-handler-p{
+        color: #fff;
+    }
 </style>
+<script>
+    var elems = document.getElementsByClassName('error-handler-body-cont-line-text');
+    Array.prototype.forEach.call(elems, function(element) {
+        var height = getComputedStyle(element).height;
+        console.log(height);
+        console.log(element);
+        console.log(element.closest('.error-handler-body-cont-line').style.height = height);
+    });
+</script>

@@ -76,9 +76,6 @@ class Controller
     public function renderTraceSystemError(\Throwable $exception): void
     {
         $dir = Abp::rootFolder();
-        echo '<link rel="shortcut icon" type="image/x-icon" href="/resourse/img/logo.png">';
-        echo '<link href="https://fonts.googleapis.com/css?family=Satisfy&display=swap" rel="stylesheet">';
-        echo '<meta charset="utf-8">';
         $exceptionName = get_class($exception);
         $exceptionText = $exception->getMessage();
         $exceptionTraceDebug = $exception->getTrace();
@@ -90,6 +87,14 @@ class Controller
             $trace[($key + 1)]['line'] = $exceptionTrace['line'];
         }
         require __DIR__ . "/../view/ErrorHandler.php";
+    }
+
+    /**
+     * Use only framework.
+     */
+    public function renderTraceFatalError(array $error): void
+    {
+        Abp::debug($error); exit();
     }
 
     protected function render(array $param = [], ?string $view = null, bool $isPartical = false): void

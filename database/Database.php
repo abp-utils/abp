@@ -22,7 +22,13 @@ class Database
     private function __construct()
     {
         $this->config = Abp::$config['db'];
-        $dsn = 'mysql:host='.$this->config['host'].';dbname='.$this->config['name'].';charset='.$this->config['charset'];
+        $dsn = 'mysql:host='.$this->config['host'].';dbname='.$this->config['name'].';';
+        if (isset($this->config['port'])) {
+            $dsn .= 'port=' . $this->config['port'].';';
+        }
+        if (isset($this->config['charset'])) {
+            $dsn .= 'charset='.$this->config['charset'].';';
+        }
         $user = $this->config['user'];
         $pass = $this->config['pass'];
 
@@ -48,7 +54,7 @@ class Database
     public function showException(\Throwable $e, string $sql = null)
     {
         if ($sql === null) {
-            throw new DatabaseException($e->getMessage());
+            throw $e;
         }
         throw new DatabaseException($e->getMessage() . ' SQL: ' . $sql);
     }
