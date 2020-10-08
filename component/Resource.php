@@ -2,77 +2,144 @@
 
 namespace abp\component;
 
+use http\Exception\InvalidArgumentException;
+
 /**
  * Class Resource
  * @package app\component
  */
 class Resource
 {
-    const RESOURCE_FOLDER = 'resourse';
+    private const RESOURCE_FOLDER = 'resource';
+    private const DEFAULT_HASH    = '3245e2b9233a48c1e5274a8eb5d6863f';
 
-    const DEFAULT_HASH = '3245e2b9233a48c1e5274a8eb5d6863f';
+    private const EXTENSION_CSS   = 'css';
+    private const EXTENSION_JS    = 'js';
 
-    const EXTENSION_CSS = 'css';
-    const EXTENSION_JS = 'js';
+    private const TYPE_CSS        = 'text/css';
+    private const TYPE_JS         = 'text/javascript';
 
-    const TYPE_CSS = 'text/css';
-    const TYPE_JS = 'text/javascript';
+    private const NPM_ASSET = 'npm-asset';
 
-    const DEPENDS_BOOTSTRAP = 'bootstrap';
-    const DEPENDS_JQUERY = 'jquery';
+    private const VENDOR_FOLDER = 'vendor';
 
-    public static function registerFile($file, $type = null, $return = false)
+    private const DEPENDS = [
+        'satisfy' => [
+            'paths' => [
+                self::NPM_ASSET . '/fontsource-satisfy/index.css',
+                ],
+        ],
+        'font-awesome' => [
+            'paths' => [
+                self::NPM_ASSET . '/font-awesome/css/all.min.css',
+                self::NPM_ASSET . '/font-awesome/js/all.min.js',
+            ],
+        ],
+        'bootstrap' => [
+            'paths' => [
+                self::NPM_ASSET . '/bootstrap/dist/css/bootstrap.min.css',
+                self::NPM_ASSET . '/bootstrap/dist/js/bootstrap.min.js',
+            ],
+        ],
+        'jquery' => [
+            'paths' => [
+                self::NPM_ASSET . '/jquery/dist/jquery.min.js',
+            ],
+        ],
+    ];
+
+    private static $registredFiles = [
+        self::EXTENSION_CSS => '',
+        self::EXTENSION_JS => '',
+    ];
+
+    public static function register(array $resources): void
     {
-        $resource = '';
+        foreach ($resources as $resource) {
+            if (!isset($resource['resource'])){
+                continue;
+            }
+            self::registerResorce($resource);
+        }
+        echo self::$registredFiles[self::EXTENSION_CSS];
+    }
+
+    private static function registerResorce(array $resource): void
+    {
+        $type = $resource['type'] ?? null;
+        $extension = $type;
+        $name = $resource['resource'];
 
         if ($type == null) {
-            $extension = explode('.', $file);
-            $extension = $extension[count($extension) - 1];
+            $extensionParts = explode('.', $name);
+            $extension = end($extensionParts);
             $type = self::convertExtensionInType($extension);
         } else {
             $type = self::convertExtensionInType($type);
         }
+        $resourceDefault = self::DEPENDS[$name] ?? null;
+        $resourceFolder = \Abp::$root . self::RESOURCE_FOLDER;
 
+        if ($resourceDefault !== null) {
+            $vendorFolder = \Abp::$root . self::VENDOR_FOLDER;
+            foreach ($resourceDefault['paths'] as $localPath) {
+                $pathToResource = $vendorFolder .  '/' . $localPath;
+                $parsePath = explode('/', $localPath);
+                $localPath = $parsePath[1];
+                $pathToResourceParts = explode('.', $pathToResource);
+                $extension = end($pathToResourceParts);
+                self::saveHTML(self::convertExtensionInType($extension), self::createResource($pathToResource, $localPath));
+            }
+        } else {
+            $pathToResource = $resourceFolder .  '/' . $extension . '/' . $name;
+            self::saveHTML($type, self::createResource($pathToResource, $extension));
+        }
+    }
+
+    private static function createResource(string $pathToResource, string $localPath): string
+    {
+        $resourceFolderRuntime = \Abp::$root . self::RESOURCE_FOLDER . '/runtime/';
+
+        if (!file_exists($pathToResource)) {
+            throw new \InvalidArgumentException("Invalid path to resource: $pathToResource");
+        }
+        $runtimeFolderHash = self::getHash($localPath);
+        $lastModifyTimeHash = self::getTimeFileChange($pathToResource);
+        $partPathToResource = explode('.', $pathToResource);
+        $extension = end($partPathToResource);
+        $fileWebAccess = "runtime/$runtimeFolderHash/$lastModifyTimeHash.$extension";
+        $runtimeFolderPath = $resourceFolderRuntime . $runtimeFolderHash;
+        $runtimeFilePath = "$runtimeFolderPath/$lastModifyTimeHash.$extension";
+        if (file_exists($runtimeFilePath)) {
+            return $fileWebAccess;
+        }
+        if (!is_dir($runtimeFolderPath)) {
+            mkdir($runtimeFolderPath, 0777);
+        }
+        copy($pathToResource, $runtimeFilePath);
+        return $fileWebAccess;
+    }
+
+    private static function saveHTML(string $type, string $file): void
+    {
         switch ($type) {
             case self::TYPE_CSS:
-                $resource = '<link rel="stylesheet" type="'. $type . '" href="/'. self::RESOURCE_FOLDER . '/' . $file . '?hash=' . self::getTimeFileChange(self::RESOURCE_FOLDER . '/' . $file) . '">';
-                switch ($file) {
-                    case self::DEPENDS_BOOTSTRAP:
-                        $resource = '<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">';
-                        break;
-                }
-                    break;
+                self::$registredFiles[self::EXTENSION_CSS] .= '<link rel="stylesheet" type="'. $type . '" href="/'. self::RESOURCE_FOLDER . '/' . $file . '">';
+                break;
             case self::TYPE_JS:
-                $resource = '<script type="'. $type . '" src="/'. self::RESOURCE_FOLDER . '/' . $file . '?hash=' . self::getTimeFileChange(self::RESOURCE_FOLDER . '/' . $file) . '"></script>';
-                switch ($file) {
-                    case self::DEPENDS_BOOTSTRAP:
-                        $resource = '<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>';
-                        $resource .= '<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>';
-                        break;
-                    case self::DEPENDS_JQUERY:
-                        $resource = '<script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin="anonymous"></script>';
-                        break;
-                }
+                self::$registredFiles[self::EXTENSION_JS] .= '<script type="'. $type . '" src="/'. self::RESOURCE_FOLDER . '/' . $file . '"></script>';
+                break;
+            default:
+                break;
         }
-
-        if ($return) {
-            return $resource;
-        }
-
-        echo $resource;
     }
 
-    public static function register($files)
+    public static function printRegistredJsFiles(): void
     {
-        foreach ($files as $file) {
-            if (!isset($file['file'])) {
-                continue;
-            }
-            echo self::registerFile($file['file'], $file['type'] ?? null, true);
-        }
+        echo self::$registredFiles[self::EXTENSION_JS];
     }
 
-    private static function convertExtensionInType($extension)
+    private static function convertExtensionInType($extension): string
     {
         switch ($extension) {
             case self::EXTENSION_CSS:
@@ -84,13 +151,13 @@ class Resource
         return $extension;
     }
 
-    private static function getTimeFileChange($file)
+    private static function getTimeFileChange(string $path): string
     {
-        if (!file_exists($file)) {
-            return self::DEFAULT_HASH;
-        }
+        return self::getHash((string) filectime($path));
+    }
 
-        return md5(filectime($file));
-
+    private static function getHash(string $string): string
+    {
+        return substr(md5($string), 0 , 10);
     }
 }

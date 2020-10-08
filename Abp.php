@@ -50,13 +50,13 @@ class Abp
     public static function init($config)
     {
         self::$config = $config;
+        self::setRoot();
         self::initTimeZone();
         if (php_sapi_name() !== 'cli') {
             self::setUrl();
         }
         self::setDb();
         self::setSession();
-        self::setRoot();
 
         self::setUserInfo();
 
