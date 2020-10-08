@@ -94,7 +94,7 @@ class Controller
      */
     public function renderTraceFatalError(array $error): void
     {
-        print_r($error); exit();
+        Abp::debug($error); exit();
     }
 
     protected function render(array $param = [], ?string $view = null, bool $isPartical = false): void

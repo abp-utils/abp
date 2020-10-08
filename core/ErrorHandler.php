@@ -3,7 +3,6 @@ namespace abp\component;
 ini_set("display_errors", "off");
 error_reporting(E_ALL);
 
-use abp\exception\FatalErrorException;
 use abp\exception\NotFoundException;
 use abp\core\Controller;
 use Abp;
@@ -11,7 +10,7 @@ use component\Logger;
 
 class ErrorHandler
 {
-    private static function parseArray($array)
+    private static function parseArray(array $array): string
     {
         if (empty($array)) {
             return '';
@@ -20,7 +19,7 @@ class ErrorHandler
         return self::parseArgs($array);
     }
 
-    public static function parseArgs($args)
+    public static function parseArgs(array $args): string
     {
         $argsString = '';
         foreach ($args as $key => $arg) {
@@ -49,7 +48,7 @@ class ErrorHandler
     /**
      * @param \Exception $exception
      */
-    public static function exceptionHandler($exception)
+    public static function exceptionHandler($exception): void
     {
         if (php_sapi_name() === 'cli') {
             echo 'Uncaught Error: ' . $exception->getMessage() . ' in '. $exception->getFile() . ':' . $exception->getLine() . PHP_EOL;
@@ -69,10 +68,20 @@ class ErrorHandler
         }
     }
 
-    public static function fatalError(array $error)
+    public static function fatalError(array $error): void
     {
-        (new Controller())->renderTraceFatalError($error);
-        exit();
+        $config = Abp::$config['app'];
+        if (php_sapi_name() === 'cli') {
+            print_r($error); exit();
+        }
+        switch ($config['debug']) {
+            case 'false':
+                (new Controller())->renderSystemError(new \Exception('Unknown error.'));
+                exit();
+            default:
+                (new Controller())->renderTraceFatalError($error);
+                exit();
+        }
     }
 }
 set_exception_handler(function ($exception) {
