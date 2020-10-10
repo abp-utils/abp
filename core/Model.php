@@ -14,6 +14,9 @@ class Model extends Form
 {
     const MODEL_DEFAULT_FOLDER = '\model\\';
 
+    public const DEFAULT_CREATE_TIME_FIELD = 'created_time';
+    public const DEFAULT_UPDATE_TIME_FIELD = 'updated_time';
+
     protected $_attributes = [];
     protected $_oldAttributes = [];
     protected $_changeAttributes = [];

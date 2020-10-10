@@ -3,6 +3,7 @@
 namespace abp\database;
 
 use abp\component\Api;
+use abp\core\Model;
 use abp\database\Query;
 
 class ActiveRecord extends Query
@@ -49,7 +50,15 @@ class ActiveRecord extends Query
 
         $attributes = [];
         $values = [];
-
+        $timestampArray = [];
+        if ($this->_isNewRecord && $timestampArray = $this->createTimestamp()) {
+            $timestampIndex = array_key_first($timestampArray);
+        } else if ($timestampArray = $this->updateTimestamp()){
+            $timestampIndex = array_key_first($timestampArray);
+        }
+        if (isset($timestampArray[$timestampIndex])) {
+            $this->$timestampIndex = $timestampArray[$timestampIndex];
+        }
         foreach ($this->_changeAttributes as $key => $value) {
             $attributes[] = $key;
             $valueAttributes = isset($this->changingAttributes()[$key]) ? $this->changingAttributes()[$key]() : $value;
@@ -64,6 +73,22 @@ class ActiveRecord extends Query
             return $result;
         }
         return $this->insert($attributes, $values);
+    }
+
+    /**
+     * @return array|bool
+     */
+    public function createTimestamp()
+    {
+        return [Model::DEFAULT_CREATE_TIME_FIELD => time()];
+    }
+
+    /**
+     * @return array|bool
+     */
+    public function updateTimestamp()
+    {
+        return [Model::DEFAULT_UPDATE_TIME_FIELD => time()];
     }
 }
 
