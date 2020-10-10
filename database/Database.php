@@ -56,7 +56,7 @@ class Database
         if ($sql === null) {
             throw $e;
         }
-        throw new DatabaseException($e->getMessage() . ' SQL: ' . $sql);
+        throw new DatabaseException($e->getMessage(), $sql);
     }
 
     /**
@@ -77,7 +77,7 @@ class Database
      * @return array|bool
      * @throws DatabaseException
      */
-    public function exec(string $sql, $parametrs, $return = false)
+    private function exec(string $sql, $parametrs, $return = false)
     {
         try {
             $stmt = $this->pdo->prepare($sql);

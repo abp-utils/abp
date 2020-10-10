@@ -40,8 +40,11 @@ class Query extends Model
      * @param string $class
      * @param array $params
      */
-    public function __construct($class, $params = [])
+    public function __construct($class = null, $params = [])
     {
+        if ($class === null) {
+            return;
+        }
         $this->modelClass = $class;
         parent::__construct($class, $params);
     }

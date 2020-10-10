@@ -44,6 +44,8 @@ class Abp
 
     public static $root;
 
+    public static $user;
+
     /**
      * @param array $config
      */
