@@ -2,29 +2,69 @@
 
 namespace abp\model;
 
+use abp\component\Security;
 use abp\database\ActiveQuery;
 
 class User extends ActiveQuery
 {
+    private const USER_ID_COLUMN = 'user_id';
+    private const TOKEN_COLUMN = 'token';
+
+    private const SESSION_AUTH_DETERMITER = '.';
+    private const SESSION_AUTH_ID = 'SID';
+
+    private const TOKEN_API_ID = 'token';
+
     private static $tableName;
 
     private $ip;
     private $userAgent;
 
-    public function __construct($tableName)
+    private $isGuest = true;
+    private $id;
+
+    public function __construct(string $tableName)
     {
-        self::$tableName = $tableName;
+        if (self::$tableName === null) {
+            self::$tableName = $tableName;
+        }
         parent::__construct(get_called_class());
+        $this->loginCookie();
     }
 
-    public static function tableName()
+    public static function tableName(): string
     {
         return self::$tableName;
     }
 
-    public function loginCookie()
+    public function loginCookie(): void
     {
+        $cookieSession = \Abp::getCookie(self::SESSION_AUTH_ID);
+        if ($cookieSession === null) {
+            return;
+        }
+        [$identity, $token] = $this->parseSessionInfo(\Abp::getCookie(self::SESSION_AUTH_ID));
+        if (empty($identity) || empty($token)) {
+            return;
+        }
+        $hashToken = Security::generateHash($token);
+        $this->isGuest = !(new UserSession())->whereContidion([
+            [self::USER_ID_COLUMN => $identity],
+            'and',
+            [self::TOKEN_COLUMN => $hashToken],
+        ])->exist();
+        if ($this->isGuest) {
+            return;
+        }
+        $this->id = $identity;
+    }
 
+    public function logoutCookie(): void
+    {
+        \Abp::dropCookie(
+            self::SESSION_AUTH_ID
+        );
+        \Abp::dropCookie(self::TOKEN_API_ID);
     }
 
     public function has()
@@ -32,9 +72,14 @@ class User extends ActiveQuery
 
     }
 
-    public function getId()
+    public function getId(): ?string
     {
+        return $this->id;
+    }
 
+    public function isGuest(): bool
+    {
+        return $this->isGuest;
     }
 
     public function getIp(): ?string
@@ -53,18 +98,27 @@ class User extends ActiveQuery
         return $this->userAgent;
     }
 
+    /**
+     * @return "UserIdentity.Token"
+     */
     public function parseSessionInfo(?string $session): array
     {
         if ($session === null) {
             return [];
         }
-        $session = explode('.', $session);
-        if (count($session !== 2)) {
+        $session = explode(self::SESSION_AUTH_DETERMITER, $session);
+        if (count($session) !== 2) {
             return [];
         }
-        return [
-            'identity' => $session[0],
-            'token' => $session[1],
-        ];
+        return [$session[0], $session[1]];
+    }
+
+    public function setCookieAuthInfo(string $userId, string $sessionToken, string $userToken): void
+    {
+        \Abp::setCookie(
+            self::SESSION_AUTH_ID,
+            $userId . self::SESSION_AUTH_DETERMITER . $sessionToken
+        );
+        \Abp::setCookie(self::TOKEN_API_ID, $userToken);
     }
 }

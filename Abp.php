@@ -46,9 +46,13 @@ class Abp
     /** @var \abp\model\User */
     public static $user;
 
-    public static function setUser($tableName = 'user')
+    public static function setUser(
+        $tableUserName = 'user',
+        $tableSessionName = 'user_session'
+    )
     {
-        $user = new \abp\model\User($tableName);
+        \abp\model\UserSession::setTableName($tableSessionName);
+        $user = new \abp\model\User($tableUserName);
         self::$user = $user;
     }
 
@@ -57,17 +61,18 @@ class Abp
      */
     public static function init($config)
     {
-        if (self::$user === null) {
-            self::setUser();
-        }
-        self::$config = $config;
         self::setRoot();
+        self::$config = $config;
         self::initTimeZone();
         if (php_sapi_name() !== 'cli') {
             self::setUrl();
         }
         self::setDb();
         self::setSession();
+
+        if (self::$user === null) {
+            self::setUser();
+        }
 
         Router::init();
     }
@@ -157,10 +162,9 @@ class Abp
     }
 
     /**
-     * @param null $param
-     * @return bool|mixed
+     * @return array|string|null
      */
-    public static function getCookie($param = null)
+    public static function getCookie(?string $param = null)
     {
         if ($param === null) {
             return $_COOKIE;

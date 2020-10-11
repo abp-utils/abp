@@ -11,4 +11,6 @@ interface RoleAccessManagerInterface
     public function setRoleAccess(): array;
 
     public function setRolesDepends(): array;
+
+    public static function getRoles(): array;
 }

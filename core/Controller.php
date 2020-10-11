@@ -39,7 +39,7 @@ class Controller
         return true;
     }
 
-    protected function redirect(string $url): void
+    protected function redirect(string $url = ''): void
     {
         Abp::redirect(Abp::url($url));
     }

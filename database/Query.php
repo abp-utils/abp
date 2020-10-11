@@ -236,7 +236,6 @@ class Query extends Model
         if (!is_array($expression)) {
             $column = $expression;
             if ($value === null) {
-                Abp::debug($expression); exit();
                 throw new \InvalidArgumentException("Value for $column undefined.");
             }
             return [$column, $value, $contidion];
@@ -269,7 +268,9 @@ class Query extends Model
      * 'and'
      * ['column4', 'value', '<'],
      * 'or'
-     * ['column5', 'value', '<>'],
+     * ['column5', 'value', '<>']
+     *
+     * Attention: $whereOperator use ONLY FRAMEWORK!
      */
     public function whereContidion(array $contidion, $whereOperator = 'AND'): self
     {

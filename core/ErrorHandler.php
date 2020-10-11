@@ -11,6 +11,14 @@ use component\Logger;
 
 class ErrorHandler
 {
+    private const PHP_FATAL_ERRORS = [
+        E_ERROR,
+        E_PARSE,
+        E_CORE_ERROR,
+        E_COMPILE_ERROR,
+        E_USER_ERROR,
+    ];
+
     private static function parseArray(array $array): string
     {
         if (empty($array)) {
@@ -94,7 +102,7 @@ set_exception_handler(function ($exception) {
 
 register_shutdown_function(function () {
     $error = error_get_last();
-    if ($error === null) {
+    if ($error === null || !in_array($error['type'] ?? '', self::PHP_FATAL_ERRORS)) {
         return;
     }
     ErrorHandler::fatalError($error);
