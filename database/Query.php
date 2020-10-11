@@ -23,7 +23,7 @@ class Query extends Model
 
     const JOIN_INNER = 'INNER';
     const JOIN_LEFT = 'LEFT';
-
+    
     public $modelClass;
 
     private $_fromFlag = false;
@@ -34,6 +34,8 @@ class Query extends Model
     protected $_order = '';
     protected $_limit = '';
     protected $_join = '';
+
+    private $describe;
 
     /**
      * Query constructor.
@@ -207,17 +209,46 @@ class Query extends Model
      */
     public function where($expression, $value = null, $contidion = '=')
     {
+        [$column, $value, $contidion] = $this->convertExpressionValue($expression, $value);
+        if (empty($this->_where)) {
+            $this->_where = ' WHERE' . $this->wherePrepare($column, $value, $contidion);
+        } else {
+            $this->_where .= $this->wherePrepare($column, $value, $contidion, 'AND');
+        }
+
+        return $this;
+    }
+
+    public function orWhere($expression, $value = null, $contidion = '='): self
+    {
+        [$column, $value, $contidion] = $this->convertExpressionValue($expression, $value);
+        if (empty($this->_where)) {
+            $this->_where = ' WHERE' . $this->wherePrepare($column, $value, $contidion);
+        } else {
+            $this->_where .= $this->wherePrepare($column, $value, $contidion, 'OR');
+        }
+        return $this;
+    }
+
+    private function convertExpressionValue($expression, $value = null): array
+    {
+        $contidion = '=';
         if (!is_array($expression)) {
             $column = $expression;
             if ($value === null) {
-                throw new \InvalidArgumentException("Не задано значение для столбца $column.");
+                Abp::debug($expression); exit();
+                throw new \InvalidArgumentException("Value for $column undefined.");
             }
-        } else {
-            foreach ($expression as $expressionKey => $expressionCalue) {
-                $column = $expressionKey;
-                $value = $expressionCalue;
-            }
+            return [$column, $value, $contidion];
         }
+        if (count($expression) === 1) {
+            return [array_key_first($expression), array_shift($expression), $contidion];
+        }
+        return [$expression[0], $expression[1], $expression[2] ?? $contidion];
+    }
+
+    private function wherePrepare(string $column, string $value, string $contidion = '=', ?string $operator = null)
+    {
         $sqlLPlus = '';
         $sqlRPlus = '';
 
@@ -225,29 +256,55 @@ class Query extends Model
             $sqlLPlus = '(';
             $sqlRPlus = " OR {$this->_tableName}.$column IS NULL)";
         }
-        if (empty($this->_where)) {
-            $this->_where = " WHERE $sqlLPlus{$this->_tableName}.$column $contidion '$value' $sqlRPlus";
-        } else {
-            $this->_where .= " AND $sqlLPlus{$this->_tableName}.$column $contidion '$value' $sqlRPlus";
-        }
-
-        return $this;
+        return " $operator $sqlLPlus{$this->_tableName}.$column $contidion '$value' $sqlRPlus";
     }
 
     /**
-     * @param string $column
-     * @param string $value
-     * @param string $contidion
-     * @return $this
+     * Condition exsample:
+     * ['column1' => 'value'],
+     * 'and'
+     * ['column2', 'value'],
+     * 'or'
+     * ['column3', 'value', '>'],
+     * 'and'
+     * ['column4', 'value', '<'],
+     * 'or'
+     * ['column5', 'value', '<>'],
      */
-    public function orWhere($column, $value, $contidion = '=')
+    public function whereContidion(array $contidion, $whereOperator = 'AND'): self
     {
-        if (empty($this->_where)) {
-            $this->_where = " WHERE {$this->_tableName}.$column $contidion '$value'";
-        } else {
-            $this->_where .= " OR {$this->_tableName}.$column $contidion '$value'";
+        $contidionsCount = count($contidion);
+        if ($contidionsCount % 2 === 0) {
+            throw new \InvalidArgumentException('Uncorrect contidion.');
         }
+        $indexContidionsCount = 0;
+        $where = '';
+        if (empty($this->_where)) {
+            $where = 'WHERE (';
+        } else {
+            $where = "$whereOperator (";
+        }
+        $currentconditionSQL = null;
+        $operator = null;
+        while ($indexContidionsCount < $contidionsCount) {
+            $currentExpression = $contidion[$indexContidionsCount];
+            [$column, $value, $contidionValue] = $this->convertExpressionValue($currentExpression);
+            $where .= $this->wherePrepare($column, $value, $contidionValue, $operator);
+            $indexContidionsCount++;
+            if ($indexContidionsCount === $contidionsCount) {
+                break;
+            }
+            $operator = $contidion[$indexContidionsCount];
+            $indexContidionsCount++;
+        }
+        $where .= ')';
+        $this->_where .= $where;
         return $this;
+    }
+
+    public function orWhereContidion(array $contidion): self
+    {
+        return $this->whereContidion($contidion, 'OR');
     }
 
     /**
@@ -271,11 +328,7 @@ class Query extends Model
         return $this;
     }
 
-    /**
-     * @param int $value
-     * @return $this
-     */
-    public function limit($value)
+    public function limit(int $value): self
     {
         $this->_limit = " LIMIT $value";
 
@@ -283,22 +336,17 @@ class Query extends Model
     }
 
     /**
-     * @param string|null $table
      * @return array|bool
      */
-    public function describe($table = null)
+    public function describe(?string $table = null)
     {
-        return $this->command('DESCRIBE `' . ($table ?? $this->_tableName) . '`');
+        if ($this->describe === null) {
+            $this->describe = $this->command('DESCRIBE `' . ($table ?? $this->_tableName) . '`');
+        }
+        return $this->describe;
     }
 
-    /**
-     * @param string $table
-     * @param string $column1
-     * @param string $column2
-     * @param string $type
-     * @return $this
-     */
-    private function join($table, $column1, $column2, $type)
+    private function join(string $table, string $column1, string $column2, string $type): self
     {
         $describeThisTable = $this->describe();
         $describeJoinTable = $this->describe($table);
@@ -319,34 +367,24 @@ class Query extends Model
         return $this;
     }
 
-    /**
-     * @param string $table
-     * @param string $column1
-     * @param string $column2
-     * @return $this
-     */
-    public function leftJoin($table, $column1, $column2)
+    public function leftJoin(string $table, string $column1, string $column2): self
     {
         $this->join($table, $column1, $column2, self::JOIN_LEFT);
     }
 
-    /**
-     * @param string $table
-     * @param string $column1
-     * @param string $column2
-     * @return $this
-     */
-    public function innerJoin($table, $column1, $column2)
+    public function innerJoin(string $table, string $column1, string $column2): self
     {
         $this->join($table, $column1, $column2, self::JOIN_INNER);
     }
 
     /**
-     * @param array|null $describeTable
      * @return bool|string
      */
-    public function getPrimaryKey($describeTable = null)
+    public function getPrimaryKey(?array $describeTable = null)
     {
+        if ($describeTable === null) {
+            $describeTable = $this->describe();
+        }
         foreach ($describeTable as $field) {
             if ($field['Key'] == self::FieldPrimaryKey) {
                 return $field['Field'];
@@ -355,10 +393,7 @@ class Query extends Model
         return false;
     }
 
-    /**
-     * @param array $relations
-     */
-    public function setRelations($relations)
+    public function setRelations(array $relations): void
     {
         foreach ($relations as $className => $relation) {
             if (count($relation) < 2) {
@@ -402,6 +437,15 @@ class Query extends Model
             return [];
         }
         return $data;
+    }
+
+    public function exist(): bool
+    {
+        if ($this->_tableName === null) {
+            return false;
+        }
+        $sql = 'SELECT EXISTS(' . rtrim($this->buildSql(), ' ;') . ');';
+        return (bool) array_shift($this->command($sql)[0]);
     }
 
     /**

@@ -72,7 +72,11 @@ class ActiveRecord extends Query
             $this->afterSave();
             return $result;
         }
-        return $this->insert($attributes, $values);
+        $pk = $this->getPrimaryKey();
+        $insertId = $this->insert($attributes, $values);
+        $this->$pk = $insertId;
+
+        return $insertId;
     }
 
     /**

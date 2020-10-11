@@ -3,7 +3,7 @@
 namespace abp\core;
 
 use Abp;
-use abp\component\ErrorHandler;
+use abp\core\ErrorHandler;
 use abp\exception\NotFoundException;
 
 /**
@@ -83,7 +83,7 @@ class Controller
         $trace[0]['text'] = 'in ' . $exception->getFile();
         $trace[0]['line'] = $exception->getLine();
         foreach ($exceptionTraceDebug as $key => $exceptionTrace) {
-            $trace[($key + 1)]['text'] = 'in ' . $exceptionTrace['file'] . ' – ' . ($exceptionTrace['class'] ?? '') . ($exceptionTrace['type'] ?? '') . $exceptionTrace['function'] . '(' . ErrorHandler::parseArgs($exceptionTrace['args']) . ')';
+            $trace[($key + 1)]['text'] = 'in ' . $exceptionTrace['file'] . ' – ' . ($exceptionTrace['class'] ?? '') . ($exceptionTrace['type'] ?? '') . $exceptionTrace['function'] . '(' . ErrorHandler::parseArgs($exceptionTrace['args'] ?? null) . ')';
             $trace[($key + 1)]['line'] = $exceptionTrace['line'];
         }
         require __DIR__ . "/../view/ErrorHandler.php";

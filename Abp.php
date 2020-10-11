@@ -23,6 +23,8 @@ class Abp
 
     const TIMEZONE_DEFAULT = 'Europe/Moscow';
 
+    public static $userTable;
+
     public static $config;
 
     public static $url;
@@ -30,9 +32,6 @@ class Abp
     public static $protocol;
     public static $requestString;
     public static $requestGet;
-
-    public static $ip;
-    public static $userAgent;
 
     /* @var Database $db */
     public static $db;
@@ -44,13 +43,23 @@ class Abp
 
     public static $root;
 
+    /** @var \abp\model\User */
     public static $user;
+
+    public static function setUser($tableName = 'user')
+    {
+        $user = new \abp\model\User($tableName);
+        self::$user = $user;
+    }
 
     /**
      * @param array $config
      */
     public static function init($config)
     {
+        if (self::$user === null) {
+            self::setUser();
+        }
         self::$config = $config;
         self::setRoot();
         self::initTimeZone();
@@ -59,8 +68,6 @@ class Abp
         }
         self::setDb();
         self::setSession();
-
-        self::setUserInfo();
 
         Router::init();
     }
@@ -117,28 +124,19 @@ class Abp
         return self::$argv;
     }
 
-    /**
-     * @return array
-     */
-    public static function server()
+    public static function server(): array
     {
         return $_SERVER;
     }
 
-    /**
-     * @return array
-     */
-    public static function post()
+    public static function post(): array
     {
         return $_POST;
     }
-
-    /**
-     * @return string
-     */
-    public static function rootFolder()
+    
+    public static function rootFolder(): string
     {
-        return self::server()['DOCUMENT_ROOT'];
+        return self::$root;
     }
 
     public static function redirect(string $url)
@@ -247,15 +245,6 @@ class Abp
             $root = implode('/', $exp);
         }
         self::$root = $root . '/';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private static function setUserInfo()
-    {
-        self::$ip = self::server()['REMOTE_ADDR'] ?? null;
-        self::$userAgent = self::server()['HTTP_USER_AGENT'] ?? null;
     }
 }
 

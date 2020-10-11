@@ -11,7 +11,7 @@ use abp\exception\DatabaseException;
  */
 class Database
 {
-    protected $pdo;
+    private $pdo;
     protected $config;
     protected static $instance = null;
 
@@ -40,10 +40,7 @@ class Database
         }
     }
 
-    /**
-     * @return \PDO
-     */
-    public function getDb()
+    public function getPdo(): \PDO
     {
         return $this->pdo;
     }
@@ -51,7 +48,7 @@ class Database
     /**
      * @throws DatabaseException
      */
-    public function showException(\Throwable $e, string $sql = null)
+    public function showException(\Throwable $e, string $sql = null): void
     {
         if ($sql === null) {
             throw $e;
@@ -59,10 +56,8 @@ class Database
         throw new DatabaseException($e->getMessage(), $sql);
     }
 
-    /**
-     * @return Database|null
-     */
-    public static function instance() {
+    public static function instance(): ?Database
+    {
         if (self::$instance === null) {
             self::$instance = new self();
         }
@@ -71,13 +66,11 @@ class Database
     }
 
     /**
-     * @param string $sql
      * @param string|array $parametrs
-     * @param bool $return
      * @return array|bool
      * @throws DatabaseException
      */
-    private function exec(string $sql, $parametrs, $return = false)
+    private function exec(string $sql, $parametrs, bool $return = false)
     {
         try {
             $stmt = $this->pdo->prepare($sql);
@@ -107,41 +100,49 @@ class Database
     }
 
     /**
-     * @param string $sql
      * @param string|array $parametrs
      * @return array|bool
      */
-    public function execute($sql , $parametrs = '')
+    public function execute(string $sql , $parametrs = '')
     {
         return $this->exec($sql, $parametrs);
     }
 
     /**
-     * @param string $sql
-     * @param string $parametrs
      * @return array|bool
      * @throws DatabaseException
      */
-    public function query(string $sql , $parametrs = '')
+    public function query(string $sql , string $parametrs = '')
     {
         return $this->exec($sql, $parametrs, true);
     }
 
-    /**
-     * @return string
-     */
-    public function lastInsertId()
+    public function lastInsertId(): string
     {
-        return $this->pdo->lastInsertId();
+        return $this->getPdo()->lastInsertId();
     }
 
     /**
-     * @param string $sql
-     * @return false|string
+     * @return bool|string
      */
-    public function quote($sql)
+    public function quote(string $sql)
     {
-        return $this->pdo->quote($sql);
+        return $this->getPdo()->quote($sql);
+    }
+
+    public function beginTransaction(): bool
+    {
+        return $this->getPdo()->beginTransaction();
+    }
+
+    public function commit(): bool
+    {
+        return $this->getPdo()->commit();
+    }
+
+    public function rollBack(): bool
+    {
+        return $this->getPdo()->rollBack();
     }
 }
 

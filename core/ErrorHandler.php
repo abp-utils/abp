@@ -1,5 +1,6 @@
 <?php
-namespace abp\component;
+namespace abp\core;
+
 ini_set("display_errors", "off");
 error_reporting(E_ALL);
 
@@ -19,8 +20,11 @@ class ErrorHandler
         return self::parseArgs($array);
     }
 
-    public static function parseArgs(array $args): string
+    public static function parseArgs(?array $args): string
     {
+        if ($args === null) {
+            return '';
+        }
         $argsString = '';
         foreach ($args as $key => $arg) {
             $argString = '';
