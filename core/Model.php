@@ -205,9 +205,11 @@ class Model extends Form
     }
 
     /**
-     * @return array
+     * Exsample:
+     * Class::class => ['one', 'column_id'],
+     * Class::class => ['one', 'column_id', 'column_id_table_relation'],
      */
-    public static function relation()
+    public static function relation(): array
     {
         return [];
     }

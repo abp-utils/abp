@@ -78,7 +78,7 @@ class Abp
     }
 
     /**
-     * @param string $message
+     * @param mixed $message
      * @param bool $console
      * @param bool $var_dump
      * @param bool $return
@@ -106,7 +106,6 @@ class Abp
             echo '</pre>';
             return;
         }
-
         ob_start();
         var_dump($message);
         return ob_get_clean();

@@ -11,9 +11,8 @@ class User extends ActiveQuery
     private const TOKEN_COLUMN = 'token';
 
     private const SESSION_AUTH_DETERMITER = '.';
-    private const SESSION_AUTH_ID = 'SID';
-
-    private const TOKEN_API_ID = 'token';
+    public const SESSION_AUTH_ID = 'SID';
+    public const TOKEN_API_ID = 'token';
 
     private static $tableName;
 
@@ -21,6 +20,7 @@ class User extends ActiveQuery
     private $userAgent;
 
     private $isGuest = true;
+
     private $id;
 
     public function __construct(string $tableName)
@@ -52,7 +52,7 @@ class User extends ActiveQuery
             [self::USER_ID_COLUMN => $identity],
             'and',
             [self::TOKEN_COLUMN => $hashToken],
-        ])->exist();
+        ])->where(['is_active' => true])->exist();
         if ($this->isGuest) {
             return;
         }
@@ -113,12 +113,14 @@ class User extends ActiveQuery
         return [$session[0], $session[1]];
     }
 
-    public function setCookieAuthInfo(string $userId, string $sessionToken, string $userToken): void
+    public function setCookieAuthInfo(string $userId, string $sessionToken, ?string $userToken = null): void
     {
         \Abp::setCookie(
             self::SESSION_AUTH_ID,
             $userId . self::SESSION_AUTH_DETERMITER . $sessionToken
         );
-        \Abp::setCookie(self::TOKEN_API_ID, $userToken);
+        if ($userToken !== null) {
+            \Abp::setCookie(self::TOKEN_API_ID, $userToken);
+        }
     }
 }

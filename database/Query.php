@@ -281,9 +281,9 @@ class Query extends Model
         $indexContidionsCount = 0;
         $where = '';
         if (empty($this->_where)) {
-            $where = 'WHERE (';
+            $where = ' WHERE (';
         } else {
-            $where = "$whereOperator (";
+            $where = " $whereOperator (";
         }
         $currentconditionSQL = null;
         $operator = null;
@@ -339,8 +339,11 @@ class Query extends Model
     /**
      * @return array|bool
      */
-    public function describe(?string $table = null)
+    public function describe(?string $table = null, $update = false)
     {
+        if ($update) {
+            return $this->command('DESCRIBE `' . ($table ?? $this->_tableName) . '`');
+        }
         if ($this->describe === null) {
             $this->describe = $this->command('DESCRIBE `' . ($table ?? $this->_tableName) . '`');
         }
@@ -350,7 +353,7 @@ class Query extends Model
     private function join(string $table, string $column1, string $column2, string $type): self
     {
         $describeThisTable = $this->describe();
-        $describeJoinTable = $this->describe($table);
+        $describeJoinTable = $this->describe($table, true);
         $attributes = [];
         foreach ($describeThisTable as $columnInfo) {
             $attributes[] = $this->_tableName . '.' . $columnInfo['Field'] . ' AS `' . $this->_tableName . '.' . $columnInfo['Field'] . '`';
@@ -368,12 +371,12 @@ class Query extends Model
         return $this;
     }
 
-    public function leftJoin(string $table, string $column1, string $column2): self
+    public function leftJoin(string $table, string $column1, string $column2): void
     {
         $this->join($table, $column1, $column2, self::JOIN_LEFT);
     }
 
-    public function innerJoin(string $table, string $column1, string $column2): self
+    public function innerJoin(string $table, string $column1, string $column2): void
     {
         $this->join($table, $column1, $column2, self::JOIN_INNER);
     }
