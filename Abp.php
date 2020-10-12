@@ -46,14 +46,34 @@ class Abp
     /** @var \abp\model\User */
     public static $user;
 
-    public static function setUser(
+    private static $tableUserName;
+    private static $tableSessionName;
+
+    public static function setUserTables(
         $tableUserName = 'user',
         $tableSessionName = 'user_session'
     )
     {
-        \abp\model\UserSession::setTableName($tableSessionName);
-        $user = new \abp\model\User($tableUserName);
-        self::$user = $user;
+        if (self::$tableUserName === null) {
+            self::$tableUserName = $tableUserName;
+        }
+        if (self::$tableSessionName === null) {
+            self::$tableSessionName = $tableSessionName;
+        }
+    }
+
+    private static function setUser()
+    {
+        if (self::$user === null) {
+            \abp\model\UserSession::setTableName(self::$tableSessionName);
+            $user = new \abp\model\User(self::$tableUserName);
+            self::$user = $user;
+        }
+    }
+
+    public static function getUser(): ?\abp\model\User
+    {
+        return self::$user;
     }
 
     /**
@@ -70,22 +90,27 @@ class Abp
         self::setDb();
         self::setSession();
 
-        if (self::$user === null) {
-            self::setUser();
-        }
+        self::setUserTables();
+        self::setUser();
 
         Router::init();
     }
 
     /**
      * @param mixed $message
-     * @param bool $console
-     * @param bool $var_dump
-     * @param bool $return
-     * @return false|string|true|void
      */
-    public static function debug($message, $console = false, $var_dump = false, $return = false)
+    public static function debugVarDump($message): void
     {
+        self::debug($message, true);
+    }
+
+    /**
+     * @param mixed $message
+     * @return mixed
+     */
+    public static function debug($message, bool $var_dump = false, bool $return = false)
+    {
+        $console = Router::isConsole();
         if ($console) {
             print_r($message); echo PHP_EOL;
             return;
@@ -168,7 +193,7 @@ class Abp
         if ($param === null) {
             return $_COOKIE;
         }
-        return isset($_COOKIE[$param]) ? htmlspecialchars($_COOKIE[$param]) : null;
+        return isset($_COOKIE[$param]) ? $_COOKIE[$param] : null;
     }
 
     /**
@@ -182,7 +207,7 @@ class Abp
         if ($time === null) {
             $time = time()+3600*24*365*10;
         }
-        setcookie($key, $value, $time, '/');
+        setcookie($key, $value, $time, $path);
     }
 
     /**
@@ -223,6 +248,11 @@ class Abp
     private static function setDb()
     {
         self::$db = Database::instance();
+    }
+
+    public static function getDb(): ?Database
+    {
+        return self::$db;
     }
 
     /**

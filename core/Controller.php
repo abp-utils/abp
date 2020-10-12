@@ -169,7 +169,6 @@ class Controller
     protected function addNotification(string $text, string $type): void
     {
         $uniqid = uniqid();
-        
         Abp::setCookie(self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid, $text);
         $this->notifications[self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid] = $text;
     }
@@ -201,7 +200,6 @@ class Controller
             $notificatiosText .= '</div>';
             Abp::dropCookie($typeExp);
         }
-
         return $notificatiosText;
     }
 
