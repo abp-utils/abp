@@ -161,6 +161,21 @@ class Model extends Form
         return $this->_unsetAttributes;
     }
 
+    public function beforeLoad(array $data): bool
+    {
+        return true;
+    }
+
+    public function afterLoad(array $data): bool
+    {
+        return true;
+    }
+
+    public function emptyLoad(array $data): bool
+    {
+        return true;
+    }
+
     /**
      * @param array $data
      * @return bool
@@ -170,21 +185,21 @@ class Model extends Form
         if (!isset($data[$this->_tableName])) {
             return false;
         }
+        $dataModel = $data[$this->_tableName];
+        $this->beforeLoad($dataModel);
 
-        $modelLoad = $data[$this->_tableName];
-
-        foreach ($modelLoad as $field => $value) {
-            if (!isset($this->$field)) {
+        foreach ($dataModel as $field => $value) {
+            if (!((isset($this->$field) || property_exists(get_class($this), $field)))) {
                 continue;
             }
 
             $this->$field = $value;
         }
-
         if (!empty($this->getChangeAttributes())) {
+            $this->afterLoad($dataModel);
             return true;
         }
-
+        $this->emptyLoad($dataModel);
         return false;
     }
 
