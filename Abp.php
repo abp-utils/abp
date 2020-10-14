@@ -23,6 +23,8 @@ class Abp
 
     const TIMEZONE_DEFAULT = 'Europe/Moscow';
 
+    public static $userTable;
+
     public static $config;
 
     public static $url;
@@ -30,9 +32,6 @@ class Abp
     public static $protocol;
     public static $requestString;
     public static $requestGet;
-
-    public static $ip;
-    public static $userAgent;
 
     /* @var Database $db */
     public static $db;
@@ -44,13 +43,46 @@ class Abp
 
     public static $root;
 
+    /** @var \abp\model\User */
+    public static $user;
+
+    private static $tableUserName;
+    private static $tableSessionName;
+
+    public static function setUserTables(
+        $tableUserName = 'user',
+        $tableSessionName = 'user_session'
+    )
+    {
+        if (self::$tableUserName === null) {
+            self::$tableUserName = $tableUserName;
+        }
+        if (self::$tableSessionName === null) {
+            self::$tableSessionName = $tableSessionName;
+        }
+    }
+
+    private static function setUser()
+    {
+        if (self::$user === null) {
+            \abp\model\UserSession::setTableName(self::$tableSessionName);
+            $user = new \abp\model\User(self::$tableUserName);
+            self::$user = $user;
+        }
+    }
+
+    public static function getUser(): ?\abp\model\User
+    {
+        return self::$user;
+    }
+
     /**
      * @param array $config
      */
     public static function init($config)
     {
-        self::$config = $config;
         self::setRoot();
+        self::$config = $config;
         self::initTimeZone();
         if (php_sapi_name() !== 'cli') {
             self::setUrl();
@@ -58,20 +90,27 @@ class Abp
         self::setDb();
         self::setSession();
 
-        self::setUserInfo();
+        self::setUserTables();
+        self::setUser();
 
         Router::init();
     }
 
     /**
-     * @param string $message
-     * @param bool $console
-     * @param bool $var_dump
-     * @param bool $return
-     * @return false|string|true|void
+     * @param mixed $message
      */
-    public static function debug($message, $console = false, $var_dump = false, $return = false)
+    public static function debugVarDump($message): void
     {
+        self::debug($message, true);
+    }
+
+    /**
+     * @param mixed $message
+     * @return mixed
+     */
+    public static function debug($message, bool $var_dump = false, bool $return = false)
+    {
+        $console = Router::isConsole();
         if ($console) {
             print_r($message); echo PHP_EOL;
             return;
@@ -92,7 +131,6 @@ class Abp
             echo '</pre>';
             return;
         }
-
         ob_start();
         var_dump($message);
         return ob_get_clean();
@@ -115,28 +153,19 @@ class Abp
         return self::$argv;
     }
 
-    /**
-     * @return array
-     */
-    public static function server()
+    public static function server(): array
     {
         return $_SERVER;
     }
 
-    /**
-     * @return array
-     */
-    public static function post()
+    public static function post(): array
     {
         return $_POST;
     }
-
-    /**
-     * @return string
-     */
-    public static function rootFolder()
+    
+    public static function rootFolder(): string
     {
-        return self::server()['DOCUMENT_ROOT'];
+        return self::$root;
     }
 
     public static function redirect(string $url)
@@ -157,15 +186,14 @@ class Abp
     }
 
     /**
-     * @param null $param
-     * @return bool|mixed
+     * @return array|string|null
      */
-    public static function getCookie($param = null)
+    public static function getCookie(?string $param = null)
     {
         if ($param === null) {
             return $_COOKIE;
         }
-        return isset($_COOKIE[$param]) ? htmlspecialchars($_COOKIE[$param]) : null;
+        return isset($_COOKIE[$param]) ? $_COOKIE[$param] : null;
     }
 
     /**
@@ -179,7 +207,7 @@ class Abp
         if ($time === null) {
             $time = time()+3600*24*365*10;
         }
-        setcookie($key, $value, $time, '/');
+        setcookie($key, $value, $time, $path);
     }
 
     /**
@@ -222,6 +250,11 @@ class Abp
         self::$db = Database::instance();
     }
 
+    public static function getDb(): ?Database
+    {
+        return self::$db;
+    }
+
     /**
      * @inheritDoc
      */
@@ -245,15 +278,6 @@ class Abp
             $root = implode('/', $exp);
         }
         self::$root = $root . '/';
-    }
-
-    /**
-     * @inheritDoc
-     */
-    private static function setUserInfo()
-    {
-        self::$ip = self::server()['REMOTE_ADDR'] ?? null;
-        self::$userAgent = self::server()['HTTP_USER_AGENT'] ?? null;
     }
 }
 

@@ -3,7 +3,7 @@
 namespace abp\core;
 
 use Abp;
-use abp\component\ErrorHandler;
+use abp\core\ErrorHandler;
 use abp\exception\NotFoundException;
 
 /**
@@ -39,7 +39,7 @@ class Controller
         return true;
     }
 
-    protected function redirect(string $url): void
+    protected function redirect(string $url = ''): void
     {
         Abp::redirect(Abp::url($url));
     }
@@ -83,7 +83,7 @@ class Controller
         $trace[0]['text'] = 'in ' . $exception->getFile();
         $trace[0]['line'] = $exception->getLine();
         foreach ($exceptionTraceDebug as $key => $exceptionTrace) {
-            $trace[($key + 1)]['text'] = 'in ' . $exceptionTrace['file'] . ' – ' . ($exceptionTrace['class'] ?? '') . ($exceptionTrace['type'] ?? '') . $exceptionTrace['function'] . '(' . ErrorHandler::parseArgs($exceptionTrace['args']) . ')';
+            $trace[($key + 1)]['text'] = 'in ' . $exceptionTrace['file'] . ' – ' . ($exceptionTrace['class'] ?? '') . ($exceptionTrace['type'] ?? '') . $exceptionTrace['function'] . '(' . ErrorHandler::parseArgs($exceptionTrace['args'] ?? null) . ')';
             $trace[($key + 1)]['line'] = $exceptionTrace['line'];
         }
         require __DIR__ . "/../view/ErrorHandler.php";
@@ -169,7 +169,6 @@ class Controller
     protected function addNotification(string $text, string $type): void
     {
         $uniqid = uniqid();
-        
         Abp::setCookie(self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid, $text);
         $this->notifications[self::NOTIFICATIONS_PREFIX . '_' . $type . '_' . $uniqid] = $text;
     }
@@ -201,7 +200,6 @@ class Controller
             $notificatiosText .= '</div>';
             Abp::dropCookie($typeExp);
         }
-
         return $notificatiosText;
     }
 

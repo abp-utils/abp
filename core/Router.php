@@ -11,8 +11,6 @@ class Router
     const CONTROLLER_FOLDER = 'controller';
     const MIGRATE_FOLDER = 'migrate';
 
-    private static $admin = false;
-    private static $api = false;
     private static $console = false;
 
     private static $param = [];
@@ -22,14 +20,10 @@ class Router
      * @throws NotFoundException
      */
     public static function init() {
-        if (!self::isConsole()) {
-            self::isAdmin();
-            self::isApi();
-        } else {
+        if (self::isConsole()) {
             Abp::$requestString = '/'.$_SERVER['argv'][1];
         }
-
-        $request = StringHelper::parseRequest(self::checkAliases(Abp::$requestString), self::$admin, self::$api);
+        $request = StringHelper::parseRequest(self::checkAliases(Abp::$requestString));
         if (!$request) {
             throw new NotFoundException();
         }
@@ -48,12 +42,6 @@ class Router
     public static function applyRoute($request)
     {
         $folder = self::CONTROLLER_FOLDER;
-        if (self::$admin) {
-            $folder =  self::$admin . '\\' . $folder;
-        }
-        if (self::$api) {
-            $folder = self::$api . '\\' .$folder;
-        }
         if (self::$console) {
             $folder = self::$console . '\\' .$folder;
         }
@@ -63,10 +51,15 @@ class Router
         $actionFull = $actionName;
         if (!class_exists($controllerFull)) {
             if (self::$console) {
+                $foundController = false;
                 try {
                     $controllerFull = self::checkSystemConsoleController($controllerName);
+                    $foundController = true;
                 } catch (\Throwable $e) {
-                    Abp::debug("Not found controller \"$controllerName\".", true); exit();
+                }
+                if (!$foundController) {
+                    Abp::debug("Not found controller \"$controllerName\".", true);
+                    return;
                 }
             } else {
                 throw new NotFoundException();
@@ -77,7 +70,8 @@ class Router
         $controller->action = $request['origin']['action'];
         if (!method_exists($controller, $actionFull)) {
             if (self::$console) {
-                Abp::debug("Action \"$actionFull\" not found in controller \"$controllerName\".", true); exit();
+                Abp::debug("Action \"$actionFull\" not found in controller \"$controllerName\".", true);
+                return;
             }
             throw new NotFoundException();
         }
@@ -123,7 +117,7 @@ class Router
                 if ($parseKey[0] !== '*' && isset($parseKey[1]) && $parseKey[1] !== '*') {
                     continue;
                 }
-                $requestParse = StringHelper::parseRequest($request, self::$admin, self::$api)['origin'];
+                $requestParse = StringHelper::parseRequest($request)['origin'];
                 if ($parseKey[0] == '*' && isset($parseKey[1]) && $parseKey[1] == $requestParse['action']) {
                     self::$param['controller'] = $requestParse['controller'];
                     return "/$value";
@@ -137,48 +131,12 @@ class Router
         return $alias;
     }
 
-    public static function isAdmin()
-    {
-        $temp = explode('/', Abp::$requestString);
-        $admin = isset(Abp::$config['router']['admin']) ? Abp::$config['router']['admin'] : false;
-        if ($admin) {
-            if ($temp[1] === $admin) {
-                if (count($temp) !== 4) {
-                    return false;
-                }
-                self::$admin = $admin;
-                return;
-            }
-        }
-        return false;
-    }
-
-    public static function isApi()
-    {
-        $temp = explode('/', Abp::$requestString);
-        $api = isset(Abp::$config['router']['api']) ? Abp::$config['router']['api'] : false;
-        if ($api) {
-            if ($temp[1] === $api) {
-                if (count($temp) !== 4) {
-                    return false;
-                }
-                self::$api = $api;
-                return;
-            }
-        }
-        return false;
-    }
-
     public static function isConsole()
     {
         if (php_sapi_name() !== 'cli') {
             return false;
         }
 
-        $temp = explode('/', $_SERVER['argv'][1]);
-        if (count($temp) !== 2) {
-            return false;
-        }
         self::$console = 'console';
         return true;
     }

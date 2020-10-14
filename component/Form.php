@@ -94,6 +94,11 @@ class Form
         return $this->input($field, 'text', $label, $help, $value, 'readonly');
     }
 
+    public function passwordInput($field, $label = '', $help = '', $value = null)
+    {
+        return $this->input($field, 'password', $label, $help, $value);
+    }
+
     /**
      * @param string $field
      * @param string $label

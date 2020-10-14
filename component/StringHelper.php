@@ -55,31 +55,9 @@ class StringHelper
         return false;
     }
 
-    public static function parseRequest($string, $admin, $api)
+    public static function parseRequest($string)
     {
         $temp = explode('/', $string);
-        if ($admin) {
-            if ($temp[1] === $admin) {
-                if (count($temp) !== 4) {
-                    return false;
-                }
-                $newTemp[0] = $temp[0];
-                $newTemp[1] = $temp[2];
-                $newTemp[2] = $temp[3];
-                $temp = $newTemp;
-            }
-        }
-        if ($api) {
-            if ($temp[1] === $api) {
-                if (count($temp) !== 4) {
-                    return false;
-                }
-                $newTemp[0] = $temp[0];
-                $newTemp[1] = $temp[2];
-                $newTemp[2] = $temp[3];
-                $temp = $newTemp;
-            }
-        }
         if (count($temp) < 2 || count($temp) > 4) {
             return false;
         }

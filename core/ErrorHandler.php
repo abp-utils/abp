@@ -1,5 +1,6 @@
 <?php
-namespace abp\component;
+namespace abp\core;
+
 ini_set("display_errors", "off");
 error_reporting(E_ALL);
 
@@ -10,6 +11,14 @@ use component\Logger;
 
 class ErrorHandler
 {
+    public const PHP_FATAL_ERRORS = [
+        E_ERROR,
+        E_PARSE,
+        E_CORE_ERROR,
+        E_COMPILE_ERROR,
+        E_USER_ERROR,
+    ];
+
     private static function parseArray(array $array): string
     {
         if (empty($array)) {
@@ -19,8 +28,11 @@ class ErrorHandler
         return self::parseArgs($array);
     }
 
-    public static function parseArgs(array $args): string
+    public static function parseArgs(?array $args): string
     {
+        if ($args === null) {
+            return '';
+        }
         $argsString = '';
         foreach ($args as $key => $arg) {
             $argString = '';
@@ -90,7 +102,7 @@ set_exception_handler(function ($exception) {
 
 register_shutdown_function(function () {
     $error = error_get_last();
-    if ($error === null) {
+    if ($error === null || !in_array($error['type'] ?? '', ErrorHandler::PHP_FATAL_ERRORS)) {
         return;
     }
     ErrorHandler::fatalError($error);
